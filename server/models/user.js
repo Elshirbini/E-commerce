@@ -11,6 +11,9 @@ const user = new Schema(
       type: String,
       required: true,
     },
+    userName: {
+      type: String,
+    },
     email: {
       type: String,
       required: true,
@@ -23,17 +26,22 @@ const user = new Schema(
       type: Object,
       default: null,
     },
+    color: {
+      type: Number,
+      enum: [1, 2, 3, 4],
+      default: 1,
+    },
     role: {
       type: String,
       enum: ["admin", "user"],
       default: "user",
     },
     passwordResetToken: {
-      type : String
+      type: String,
     },
     passwordResetTokenExpire: {
-      type : Date
-    }
+      type: Date,
+    },
   },
   { timestamps: true }
 );

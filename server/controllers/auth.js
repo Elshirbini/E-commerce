@@ -328,3 +328,36 @@ export const resetPassword = async (req, res, next) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { firstName, lastName, userName, color } = req.body;
+    const { user } = req.user;
+
+    if(!firstName && !lastName && !userName && !color){
+      return res.status(404).json({error : "No changes"})
+    }
+
+    const userDoc = await User.findByIdAndUpdate(
+      user._id,
+      {
+        firstName,
+        lastName,
+        userName,
+        color,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!userDoc) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Profile updated successfully", user: userDoc });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

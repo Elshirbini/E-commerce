@@ -13,6 +13,7 @@ import {
   sendTokenToEmail,
   validateTokenSent,
   resetPassword,
+  updateProfile,
 } from "../controllers/auth.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
 const router = express.Router();
@@ -71,5 +72,6 @@ router.patch(
   ],
   resetPassword
 );
+router.put("/update-profile", verifyToken, updateProfile);
 router.post("/logout", logout);
 export const authRoutes = router;
