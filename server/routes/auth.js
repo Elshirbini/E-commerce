@@ -54,18 +54,22 @@ router.post("/add-image", verifyToken, upload.single("image"), addImage);
 router.delete("/delete-image", verifyToken, deleteImage);
 router.post("/send-token-to-email", sendTokenToEmail);
 router.post("/validate-code-sent/:userId", validateTokenSent);
-router.patch("/reset-password/:userId", [
-  body("password")
-    .isLength({ min: 8, max: 16 })
-    .withMessage("Password should be contains from 8 to 16 chars")
-    .matches(/[A-Z]/)
-    .withMessage("Password must be contain chars from A to Z")
-    .matches(/[a-z]/)
-    .withMessage("Password must be contain chars from a to z")
-    .matches(/[0-9]/)
-    .withMessage("Password must be contains numbers")
-    .matches(/[!@#$%^&*(){}<>?~]/)
-    .withMessage("Password must be special chars"),
-] , resetPassword);
+router.patch(
+  "/reset-password/:userId",
+  [
+    body("password")
+      .isLength({ min: 8, max: 16 })
+      .withMessage("Password should be contains from 8 to 16 chars")
+      .matches(/[A-Z]/)
+      .withMessage("Password must be contain chars from A to Z")
+      .matches(/[a-z]/)
+      .withMessage("Password must be contain chars from a to z")
+      .matches(/[0-9]/)
+      .withMessage("Password must be contains numbers")
+      .matches(/[!@#$%^&*(){}<>?~]/)
+      .withMessage("Password must be special chars"),
+  ],
+  resetPassword
+);
 router.post("/logout", logout);
 export const authRoutes = router;
