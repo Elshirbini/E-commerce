@@ -92,14 +92,16 @@ export const signup = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    if (!email.trim() || !password.trim()) {
+    const { emailOrUserName, password } = req.body;
+    if (!emailOrUserName.trim() || !password.trim()) {
       return res
         .status(404)
         .json({ error: "Email and Password mustn't be empty" });
     }
 
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({
+      $or: [{ email: emailOrUserName }, { userName: emailOrUserName }],
+    });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -334,8 +336,8 @@ export const updateProfile = async (req, res, next) => {
     const { firstName, lastName, userName, color } = req.body;
     const { user } = req.user;
 
-    if(!firstName && !lastName && !userName && !color){
-      return res.status(404).json({error : "No changes"})
+    if (!firstName && !lastName && !userName && !color) {
+      return res.status(404).json({ error: "No changes" });
     }
 
     const userDoc = await User.findByIdAndUpdate(

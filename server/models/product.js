@@ -17,11 +17,16 @@ const product = new Schema(
       required: true,
     },
     image: {
-      type: String,
+      type: Object,
     },
-    category : {
-        type : String,
-        enum : ["Hoodie" , "Pantaloon" , "Jacket" , "T-shirt"]
+    category: {
+      type: String,
+      enum: ["Hoodie", "Pantaloon", "Jacket", "T-shirt"],
+    },
+    sizes: {
+      type: [String],
+      enum: ["S", "M", "L", "XL", "XXL", "XXXL"],
+      required: true,
     },
     user: {
       type: mongoose.Types.ObjectId,
@@ -31,4 +36,4 @@ const product = new Schema(
   { timestamps: true }
 );
 
-export const Product = mongoose.model("products" , product)
+export const Product = mongoose.model("products", product);

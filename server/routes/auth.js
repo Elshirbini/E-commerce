@@ -72,6 +72,23 @@ router.patch(
   ],
   resetPassword
 );
-router.put("/update-profile", verifyToken, updateProfile);
+router.put(
+  "/update-profile",
+  [
+    body("userName")
+      .trim()
+      .custom((value, { req }) => {
+        User.findOne({ userName: value }).then((userDoc) => {
+          if (userDoc) {
+            return Promise.reject(
+              "This userName not valid choose a different userName"
+            );
+          }
+        });
+      }),
+  ],
+  verifyToken,
+  updateProfile
+);
 router.post("/logout", logout);
 export const authRoutes = router;
