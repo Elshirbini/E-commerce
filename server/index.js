@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { authRoutes } from "./routes/auth.js";
 import cookieParser from "cookie-parser";
 import { productRoutes } from "./routes/product.js";
+import { cartRoutes } from "./routes/cart.js";
 configDotenv();
 const app = express();
 app.use(
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
+app.use("/api/cart", cartRoutes);
 
 app.listen(8080, () => {
   mongoose

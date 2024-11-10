@@ -15,7 +15,7 @@ export const searchingProducts = async (req, res, next) => {
     }
     const regExp = new RegExp(searchTerm.trim(), "i");
     const products = await Product.find({
-      $or: [{ name: { $regex: regExp } }, { category: { $regex: regExp } }],
+      $or: [{ name: regExp }, { category: regExp }],
     });
 
     if (!products.length) {
@@ -33,7 +33,16 @@ export const createProduct = async (req, res, next) => {
   try {
     const { user } = req.user;
     const userId = user._id;
-    const { name, price, category, description, sizes } = req.body;
+    const {
+      name,
+      price,
+      category,
+      description,
+      sizes,
+      brand,
+      quantity,
+      discount,
+    } = req.body;
 
     const userDoc = await User.findById(userId);
     if (!userDoc) {
@@ -46,6 +55,9 @@ export const createProduct = async (req, res, next) => {
       category,
       description,
       sizes,
+      brand,
+      quantity,
+      discount,
       user,
     });
     await product.save();
@@ -61,9 +73,27 @@ export const updateProduct = async (req, res, next) => {
   try {
     const { user } = req.user;
     const { productId } = req.params;
-    const { name, price, category, description, sizes } = req.body;
+    const {
+      name,
+      price,
+      category,
+      description,
+      sizes,
+      brand,
+      quantity,
+      discount,
+    } = req.body;
 
-    if (!name && !price && !category && !description && !sizes) {
+    if (
+      !name &&
+      !price &&
+      !category &&
+      !description &&
+      !sizes &&
+      !brand &&
+      !quantity &&
+      !discount
+    ) {
       return res.status(404).json({ error: "No changes" });
     }
 
@@ -80,6 +110,8 @@ export const updateProduct = async (req, res, next) => {
         category,
         description,
         sizes,
+        brand,
+        discount,
       },
       { new: true, runValidators: true }
     );
@@ -135,16 +167,6 @@ export const deleteImages = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const public_id = req.query.image;
-
-    console.log(productId);
-    console.log(public_id);
-    // const products = await Product.find();
-    // products.forEach((product) => {
-    //   if (!product.images.length) {
-    //     product.images = null;
-    //     product.save();
-    //   }
-    // });
 
     const product = await Product.findByIdAndUpdate(productId, {
       $pull: { images: { public_id: public_id } },

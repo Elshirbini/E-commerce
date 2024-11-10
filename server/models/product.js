@@ -24,13 +24,34 @@ const product = new Schema(
       type: String,
       enum: ["Hoodie", "Pantaloon", "Jacket", "T-shirt"],
     },
+    brand: {
+      type: String,
+      enum: [
+        "Defacto",
+        "H&M",
+        "Nike",
+        "Gucci",
+        "Crocs",
+        "Tommy Hilfiger",
+        "Versace",
+        "Adidas",
+      ],
+      default: "Unknown brand",
+    },
     sizes: {
       type: [String],
       enum: ["S", "M", "L", "XL", "XXL", "XXXL"],
       required: true,
     },
+    quantity: {
+      type: Number,
+      required : true
+    },
+    discount: {
+      type: Number,
+    },
     user: {
-      type: mongoose.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "users",
     },
   },
