@@ -1,17 +1,19 @@
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
-import { cloudinary } from "../utils/cloudinary.js";
+import { cloudinary } from "../config/cloudinary.js";
+import { ApiError } from "../utils/apiError.js";
 
 export const searchingProducts = async (req, res, next) => {
   try {
     const { user } = req.user;
     const { searchTerm } = req.body;
+
     if (!searchTerm.length) {
-      return res.status(400).json({ error: "Search term required" });
+      return next(new ApiError("Search term required", 404));
     }
     const userDoc = await User.findById(user._id);
     if (!userDoc) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
     const regExp = new RegExp(searchTerm.trim(), "i");
     const products = await Product.find({
@@ -19,13 +21,12 @@ export const searchingProducts = async (req, res, next) => {
     });
 
     if (!products.length) {
-      return res.status(404).json({ error: "No products found" });
+      return next(new ApiError("No products found", 404));
     }
 
     res.status(200).json({ product: products });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -46,7 +47,7 @@ export const createProduct = async (req, res, next) => {
 
     const userDoc = await User.findById(userId);
     if (!userDoc) {
-      return res.status(404).send("User not found.");
+      return next(new ApiError("User not found", 404));
     }
 
     const product = await Product.create({
@@ -64,8 +65,7 @@ export const createProduct = async (req, res, next) => {
 
     res.status(201).json({ product: product });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -94,12 +94,12 @@ export const updateProduct = async (req, res, next) => {
       !quantity &&
       !discount
     ) {
-      return res.status(404).json({ error: "No changes" });
+      return next(new ApiError("No changes", 400));
     }
 
     const userDoc = await User.findById(user._id);
     if (!userDoc) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
 
     const product = await Product.findByIdAndUpdate(
@@ -117,15 +117,14 @@ export const updateProduct = async (req, res, next) => {
     );
 
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return next(new ApiError("Product not found", 404));
     }
 
     res
       .status(200)
       .json({ message: "Product updated successfully", product: product });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -137,7 +136,7 @@ export const addImages = async (req, res, next) => {
 
     const userDoc = await User.findById(user._id);
     if (!userDoc) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
     const result = await cloudinary.uploader.upload(image, {
       folder: "Products",
@@ -156,10 +155,13 @@ export const addImages = async (req, res, next) => {
       { new: true, runValidators: true }
     );
 
+    if (!product) {
+      return next(new ApiError("Product not found", 404));
+    }
+
     res.status(200).json({ productImages: product.images });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -173,7 +175,7 @@ export const deleteImages = async (req, res, next) => {
     });
 
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return next(new ApiError("Product not found", 404));
     }
 
     await cloudinary.uploader.destroy(public_id);
@@ -185,7 +187,6 @@ export const deleteImages = async (req, res, next) => {
 
     res.status(200).json({ message: "Image deleted successfully" });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };

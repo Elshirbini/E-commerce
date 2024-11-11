@@ -8,7 +8,7 @@ import {
   updateProduct,
 } from "../controllers/product.js";
 import { isAdmin } from "../middlewares/isAdmin.js";
-import { upload } from "../utils/multer.js";
+import { upload } from "../config/multer.js";
 
 const router = express.Router();
 
@@ -22,11 +22,6 @@ router.post(
   upload.single("image"),
   addImages
 );
-router.delete(
-  "/delete-images/:productId",
-  verifyToken,
-  isAdmin,
-  deleteImages
-);
+router.delete("/delete-images/:productId", verifyToken, isAdmin, deleteImages);
 
 export const productRoutes = router;

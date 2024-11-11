@@ -1,10 +1,11 @@
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { validationResult } from "express-validator";
 import { User } from "../models/user.js";
-import { cloudinary } from "../utils/cloudinary.js";
-import crypto from "crypto";
+import { cloudinary } from "../config/cloudinary.js";
+import { ApiError } from "../utils/apiError.js";
 
 const maxAge = 1 * 24 * 60 * 60 * 1000;
 // Days * hours per day * minutes per hour * seconds per minute * milliseconds per second
@@ -23,12 +24,12 @@ export const getUserInfo = async (req, res, next) => {
     const userId = user._id;
     const userDoc = await User.findById(userId);
     if (!userDoc) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
 
     res.status(200).json({ userDoc });
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -37,12 +38,12 @@ export const signup = async (req, res, next) => {
     const { firstName, lastName, email, password, confirmPassword } = req.body;
     const errors = validationResult(req);
     if (password !== confirmPassword) {
-      return res
-        .status(401)
-        .json({ error: "Password and confirm password should be equal." });
+      return next(
+        new ApiError("Password and confirm password should be equal.", 401)
+      );
     }
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array()[0].msg });
+      return next(new ApiError(errors.array()[0].msg, 400));
     }
     const mailOptions = {
       from: "ahmedalshirbini33@gmail.com",
@@ -85,8 +86,7 @@ export const signup = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -94,21 +94,19 @@ export const login = async (req, res, next) => {
   try {
     const { emailOrUserName, password } = req.body;
     if (!emailOrUserName.trim() || !password.trim()) {
-      return res
-        .status(404)
-        .json({ error: "Email and Password mustn't be empty" });
+      return next(new ApiError("Email and Password mustn't be empty", 404));
     }
 
     const user = await User.findOne({
       $or: [{ email: emailOrUserName }, { userName: emailOrUserName }],
     });
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
     const hashedPassword = user.password;
     const isPasswordTrue = bcrypt.compare(password, hashedPassword);
     if (!isPasswordTrue) {
-      return res.status(401).json({ error: "Wrong Password" });
+      return next(new ApiError("Wrong password", 401));
     }
 
     const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN_SECRET, {
@@ -125,8 +123,7 @@ export const login = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -135,8 +132,7 @@ export const logout = async (req, res, next) => {
     res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: "None" });
     res.status(200).send("Logout successfully");
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -147,20 +143,19 @@ export const deleteAccount = async (req, res, next) => {
 
     const userDoc = await User.findById(user._id);
     if (!userDoc) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
 
     const isPasswordTrue = await bcrypt.compare(password, userDoc.password);
     if (!isPasswordTrue) {
-      return res.status(401).json({ error: "Wrong Password" });
+      return next(new ApiError("Wrong password", 401));
     }
 
     await User.deleteOne({ _id: userDoc._id });
 
     res.status(200).send("Account deleted successfully");
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -175,7 +170,7 @@ export const addImage = async (req, res, next) => {
 
     const userDoc = await User.findById(user._id);
     if (!userDoc) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
 
     userDoc.image = { public_id: result.public_id, url: result.url };
@@ -186,8 +181,7 @@ export const addImage = async (req, res, next) => {
       image: result,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -197,7 +191,7 @@ export const deleteImage = async (req, res, next) => {
     const userDoc = await User.findById(user._id);
 
     if (!userDoc) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
     await cloudinary.uploader.destroy(userDoc.image.public_id);
     userDoc.image = null;
@@ -205,8 +199,7 @@ export const deleteImage = async (req, res, next) => {
 
     return res.status(200).json({ message: "Image deleted successfully" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -216,7 +209,7 @@ export const sendTokenToEmail = async (req, res, next) => {
 
     const user = await User.findOne({ email: email });
     if (!user) {
-      return res.status(404).json({ error: "Email has no account" });
+      return next(new ApiError("Email has no account", 404));
     }
 
     const resetToken = crypto.randomBytes(3).toString("hex");
@@ -257,8 +250,7 @@ export const sendTokenToEmail = async (req, res, next) => {
       userId: user._id,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -275,15 +267,14 @@ export const validateTokenSent = async (req, res, next) => {
       passwordResetTokenExpire: { $gt: Date.now() },
     });
     if (!user) {
-      return res
-        .status(404)
-        .json({ error: "The Verification code is wrong or expired" });
+      return next(
+        new ApiError("The Verification code is wrong or expired", 401)
+      );
     }
 
     res.status(200).json({ message: "success", userId: user._id });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -294,19 +285,19 @@ export const resetPassword = async (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array()[0].msg });
+      return next(new ApiError(errors.array()[0].msg, 400));
     }
     if (password !== confirmPassword) {
-      return res
-        .status(400)
-        .json({ error: "Password and confirmPassword must be equal" });
+      return next(
+        new ApiError("Password and confirmPassword must be equal", 401)
+      );
     }
 
     const userDoc = await User.findById(userId);
 
     const isEqual = await bcrypt.compare(password, userDoc.password);
     if (isEqual) {
-      return res.status(400).json({ error: "This password has already set" });
+      return next(new ApiError("This password has already set", 404));
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -321,13 +312,12 @@ export const resetPassword = async (req, res, next) => {
     );
 
     if (!user) {
-      return res.status(401).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
 
     res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -337,7 +327,7 @@ export const updateProfile = async (req, res, next) => {
     const { user } = req.user;
 
     if (!firstName && !lastName && !userName && !color) {
-      return res.status(404).json({ error: "No changes" });
+      return next(new ApiError("No changes", 400));
     }
 
     const userDoc = await User.findByIdAndUpdate(
@@ -352,14 +342,13 @@ export const updateProfile = async (req, res, next) => {
     );
 
     if (!userDoc) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
 
     res
       .status(200)
       .json({ message: "Profile updated successfully", user: userDoc });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };

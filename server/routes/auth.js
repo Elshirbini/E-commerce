@@ -1,7 +1,7 @@
 import express from "express";
 import { body } from "express-validator";
 import { User } from "../models/user.js";
-import { upload } from "../utils/multer.js";
+import { upload } from "../config/multer.js";
 import {
   login,
   logout,

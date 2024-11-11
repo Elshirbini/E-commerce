@@ -1,6 +1,7 @@
 import { Cart } from "../models/cart.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
+import { ApiError } from "../utils/apiError.js";
 
 export const addToCart = async (req, res, next) => {
   try {
@@ -9,15 +10,13 @@ export const addToCart = async (req, res, next) => {
 
     const userData = await User.findById(user._id);
     if (!userData) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
 
     const product = await Product.findById(productId);
 
     if (!product || price !== product.price || quantity > product.quantity) {
-      return res
-        .status(404)
-        .json({ error: "Product not found or invalid request" });
+      return next(new ApiError("Product not found or invalid request", 404));
     }
 
     const cart = await Cart.findOne({ userId: userData._id });
@@ -28,9 +27,12 @@ export const addToCart = async (req, res, next) => {
       );
       if (existingProduct) {
         if (!(existingProduct.quantity <= product.quantity - 1)) {
-          return res.status(400).json({
-            error: `I'am Sorry we have ${product.quantity} items only`,
-          });
+          return next(
+            new ApiError(
+              `I'am Sorry we have ${product.quantity} items only`,
+              400
+            )
+          );
         }
         existingProduct.quantity += quantity;
         cart.totalCost += quantity * price;
@@ -73,8 +75,6 @@ export const addToCart = async (req, res, next) => {
       });
       await cart.save();
 
-      console.log(cart);
-
       const updatedCart = await Cart.findOne({ userId: cart.userId }).populate(
         "items.productId"
       );
@@ -87,8 +87,7 @@ export const addToCart = async (req, res, next) => {
         .json({ message: "Cart created successfully", cart: updatedCart });
     }
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
 
@@ -97,7 +96,7 @@ export const getUserCart = async (req, res, next) => {
     const { user } = req.user;
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return next(new ApiError("User not found", 404));
     }
 
     const cart = await Cart.findOne({ userId: user._id }).populate(
@@ -106,7 +105,6 @@ export const getUserCart = async (req, res, next) => {
 
     res.status(200).json({ cart: cart });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error" });
+    next(new ApiError(error, 500));
   }
 };
