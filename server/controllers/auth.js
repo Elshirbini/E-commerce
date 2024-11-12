@@ -23,9 +23,8 @@ export const getUserInfo = async (req, res, next) => {
     const { user } = req.user;
     const userId = user._id;
     const userDoc = await User.findById(userId);
-    if (!userDoc) {
-      return next(new ApiError("User not found", 404));
-    }
+
+    if (!userDoc) return next(new ApiError("User not found", 404));
 
     res.status(200).json({ userDoc });
   } catch (error) {
@@ -42,9 +41,10 @@ export const signup = async (req, res, next) => {
         new ApiError("Password and confirm password should be equal.", 401)
       );
     }
-    if (!errors.isEmpty()) {
+
+    if (!errors.isEmpty())
       return next(new ApiError(errors.array()[0].msg, 400));
-    }
+
     const mailOptions = {
       from: "ahmedalshirbini33@gmail.com",
       to: email,
@@ -100,14 +100,13 @@ export const login = async (req, res, next) => {
     const user = await User.findOne({
       $or: [{ email: emailOrUserName }, { userName: emailOrUserName }],
     });
-    if (!user) {
-      return next(new ApiError("User not found", 404));
-    }
+
+    if (!user) return next(new ApiError("User not found", 404));
+
     const hashedPassword = user.password;
     const isPasswordTrue = bcrypt.compare(password, hashedPassword);
-    if (!isPasswordTrue) {
-      return next(new ApiError("Wrong password", 401));
-    }
+
+    if (!isPasswordTrue) return next(new ApiError("Wrong password", 401));
 
     const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: maxAge,
@@ -142,14 +141,12 @@ export const deleteAccount = async (req, res, next) => {
     const { password } = req.body;
 
     const userDoc = await User.findById(user._id);
-    if (!userDoc) {
-      return next(new ApiError("User not found", 404));
-    }
+
+    if (!userDoc) return next(new ApiError("User not found", 404));
 
     const isPasswordTrue = await bcrypt.compare(password, userDoc.password);
-    if (!isPasswordTrue) {
-      return next(new ApiError("Wrong password", 401));
-    }
+
+    if (!isPasswordTrue) return next(new ApiError("Wrong password", 401));
 
     await User.deleteOne({ _id: userDoc._id });
 
@@ -169,9 +166,7 @@ export const addImage = async (req, res, next) => {
     });
 
     const userDoc = await User.findById(user._id);
-    if (!userDoc) {
-      return next(new ApiError("User not found", 404));
-    }
+    if (!userDoc) return next(new ApiError("User not found", 404));
 
     userDoc.image = { public_id: result.public_id, url: result.url };
     await userDoc.save();
@@ -190,9 +185,8 @@ export const deleteImage = async (req, res, next) => {
     const { user } = req.user;
     const userDoc = await User.findById(user._id);
 
-    if (!userDoc) {
-      return next(new ApiError("User not found", 404));
-    }
+    if (!userDoc) return next(new ApiError("User not found", 404));
+
     await cloudinary.uploader.destroy(userDoc.image.public_id);
     userDoc.image = null;
     await userDoc.save();
@@ -208,9 +202,7 @@ export const sendTokenToEmail = async (req, res, next) => {
     const { email } = req.body;
 
     const user = await User.findOne({ email: email });
-    if (!user) {
-      return next(new ApiError("Email has no account", 404));
-    }
+    if (!user) return next(new ApiError("Email has no account", 404));
 
     const resetToken = crypto.randomBytes(3).toString("hex");
     const hashResetToken = crypto
@@ -287,6 +279,7 @@ export const resetPassword = async (req, res, next) => {
     if (!errors.isEmpty()) {
       return next(new ApiError(errors.array()[0].msg, 400));
     }
+
     if (password !== confirmPassword) {
       return next(
         new ApiError("Password and confirmPassword must be equal", 401)
@@ -311,9 +304,7 @@ export const resetPassword = async (req, res, next) => {
       { new: true, runValidators: true }
     );
 
-    if (!user) {
-      return next(new ApiError("User not found", 404));
-    }
+    if (!user) return next(new ApiError("User not found", 404));
 
     res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
@@ -341,9 +332,7 @@ export const updateProfile = async (req, res, next) => {
       { new: true, runValidators: true }
     );
 
-    if (!userDoc) {
-      return next(new ApiError("User not found", 404));
-    }
+    if (!userDoc) return next(new ApiError("User not found", 404));
 
     res
       .status(200)

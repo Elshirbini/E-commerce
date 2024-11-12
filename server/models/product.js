@@ -18,7 +18,7 @@ const product = new Schema(
     },
     images: {
       type: [Object],
-      default: null,
+      default: [],
     },
     category: {
       type: String,
@@ -45,7 +45,7 @@ const product = new Schema(
     },
     quantity: {
       type: Number,
-      required : true
+      required: true,
     },
     discount: {
       type: Number,

@@ -9,9 +9,8 @@ export const addToCart = async (req, res, next) => {
     const { productId, quantity, price } = req.body;
 
     const userData = await User.findById(user._id);
-    if (!userData) {
-      return next(new ApiError("User not found", 404));
-    }
+
+    if (!userData) return next(new ApiError("User not found", 404));
 
     const product = await Product.findById(productId);
 
