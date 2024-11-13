@@ -41,7 +41,7 @@ export const addToCart = async (req, res, next) => {
           "items.productId"
         );
 
-        userData.cart = updatedCart;
+        userData.cart = updatedCart._id;
         await userData.save();
 
         return res
@@ -59,7 +59,7 @@ export const addToCart = async (req, res, next) => {
           { new: true, runValidators: true }
         ).populate("items.productId");
 
-        userData.cart = updatedCart;
+        userData.cart = updatedCart._id;
         await userData.save();
 
         return res
@@ -78,7 +78,7 @@ export const addToCart = async (req, res, next) => {
         "items.productId"
       );
 
-      userData.cart = updatedCart;
+      userData.cart = updatedCart._id;
       await userData.save();
 
       res
@@ -103,6 +103,48 @@ export const getUserCart = async (req, res, next) => {
     );
 
     res.status(200).json({ cart: cart });
+  } catch (error) {
+    next(new ApiError(error, 500));
+  }
+};
+
+export const removeFromCart = async (req, res, next) => {
+  try {
+    const { cartId, productId } = req.params;
+    const { user } = req.user;
+
+    const userData = await User.findById(user._id);
+    if (!userData) return next(new ApiError("User not found"));
+
+    let cart = await Cart.findById(cartId);
+    if (!cart) return next(new ApiError("Cart not found", 404));
+
+    const product = await Product.findById(productId);
+    const productInCart = cart.items.find(
+      (ele) => ele.productId.toString() === productId
+    );
+    if (!product || !productInCart) {
+      return next(
+        new ApiError("Product not found in products or not found in cart", 404)
+      );
+    }
+
+    cart = await Cart.findByIdAndUpdate(
+      cart._id,
+      {
+        $pull: { items: { productId: productInCart.productId } },
+      },
+      { new: true, runValidators: true }
+    );
+
+    cart.totalCost = cart.items.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
+    await cart.save();
+
+    res.status(200).json({ message: "Product deleted from cart successfully" });
+
   } catch (error) {
     next(new ApiError(error, 500));
   }
