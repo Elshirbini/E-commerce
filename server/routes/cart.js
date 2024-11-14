@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middlewares/verifyToken.js";
-import { addToCart, getUserCart, removeFromCart } from "../controllers/cart.js";
+import { addToCart, getUserCart, removeFromCart, updateQuantity } from "../controllers/cart.js";
 
 const router = express.Router();
 
@@ -13,5 +13,7 @@ router.delete(
   verifyToken,
   removeFromCart
 );
+
+router.patch("/update-qty/:cartId/:productId", verifyToken , updateQuantity);
 
 export const cartRoutes = router;

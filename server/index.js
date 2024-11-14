@@ -8,6 +8,7 @@ import { productRoutes } from "./routes/product.js";
 import { cartRoutes } from "./routes/cart.js";
 import { ApiError } from "./utils/apiError.js";
 import { errorHandling } from "./middlewares/errorHandling.js";
+import { dbConnection } from "./config/dbConnection.js";
 configDotenv();
 const app = express();
 app.use(
@@ -31,10 +32,10 @@ app.all("*", (req, res, next) => {
 app.use(errorHandling);
 
 app.listen(8080, () => {
-  mongoose
-    .connect(process.env.DB_URL)
-    .then(() => {
-      console.log("connected");
-    })
-    .catch((err) => console.log(err));
+  dbConnection();
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error(`Unhandled Rejection Errors : ${err.name} | ${err.message}`);
+  process.exit(1);
 });

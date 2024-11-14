@@ -116,7 +116,7 @@ export const removeFromCart = async (req, res, next) => {
     const userData = await User.findById(user._id);
     if (!userData) return next(new ApiError("User not found"));
 
-    let cart = await Cart.findById(cartId);
+    const cart = await Cart.findById(cartId);
     if (!cart) return next(new ApiError("Cart not found", 404));
 
     const product = await Product.findById(productId);
@@ -129,7 +129,7 @@ export const removeFromCart = async (req, res, next) => {
       );
     }
 
-    cart = await Cart.findByIdAndUpdate(
+    await Cart.findByIdAndUpdate(
       cart._id,
       {
         $pull: { items: { productId: productInCart.productId } },
@@ -144,7 +144,60 @@ export const removeFromCart = async (req, res, next) => {
     await cart.save();
 
     res.status(200).json({ message: "Product deleted from cart successfully" });
+  } catch (error) {
+    next(new ApiError(error, 500));
+  }
+};
 
+export const updateQuantity = async (req, res, next) => {
+  try {
+    const { user } = req.user;
+    const { cartId, productId } = req.params;
+    const { quantity } = req.body;
+
+    if (!quantity) {
+      return next(new ApiError("Quantity is required"));
+    }
+
+    const userData = await User.findById(user._id);
+    if (!userData) return next(new ApiError("User not found"));
+
+    const cart = await Cart.findById(cartId);
+    if (!cart) return next(new ApiError("Cart not found"));
+
+    const product = await Product.findById(productId);
+    if (!product) return next(new ApiError("Product not found"));
+
+    const productInCart = cart.items.find(
+      (ele) => ele.productId.toString() === productId
+    );
+
+    if (!product || !productInCart) {
+      return next(
+        new ApiError("Product not found in products or not found in cart")
+      );
+    }
+    await Cart.findOneAndUpdate(
+      { _id: cartId, "items.productId": productId },
+      {
+        $set: { "items.$.quantity": quantity },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    cart.totalCost = cart.items.reduce(
+      (acc, item) => acc + item.quantity * item.price,
+      0
+    );
+
+    await cart.save();
+
+    res
+      .status(200)
+      .json({ message: "Quantity updated successfully", cart: cart });
   } catch (error) {
     next(new ApiError(error, 500));
   }
