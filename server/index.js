@@ -8,6 +8,7 @@ import { cartRoutes } from "./routes/cart.js";
 import { ApiError } from "./utils/apiError.js";
 import { errorHandling } from "./middlewares/errorHandling.js";
 import { dbConnection } from "./config/dbConnection.js";
+import { couponRoutes } from "./routes/coupon.js";
 configDotenv();
 const app = express();
 app.use(
@@ -23,6 +24,12 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/coupon", couponRoutes);
+
+
+app.get("/", (req, res) => res.send("Hello from dockerrrr"));
+app.use("/favicon.ico", express.static("./favicon.ico"));
+
 
 app.all("*", (req, res, next) => {
   next(new ApiError(`Can't find this route : ${req.originalUrl}`, 400));

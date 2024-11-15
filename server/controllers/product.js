@@ -64,7 +64,9 @@ export const createProduct = async (req, res, next) => {
     });
 
     for (const info of images) {
-      const result = await cloudinary.uploader.upload(info.path);
+      const result = await cloudinary.uploader.upload(info.path, {
+        folder: "Products",
+      });
       product.images.push({ public_id: result.public_id, url: result.url });
     }
     await product.save();
@@ -182,7 +184,7 @@ export const deleteImages = async (req, res, next) => {
     await cloudinary.uploader.destroy(public_id);
 
     if (!product.images.length) {
-      product.images = null;
+      product.images = [];
       await product.save();
     }
 
