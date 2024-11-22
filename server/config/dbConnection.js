@@ -1,4 +1,4 @@
-import {connect} from "mongoose";
+import { connect } from "mongoose";
 import { configDotenv } from "dotenv";
 configDotenv();
 

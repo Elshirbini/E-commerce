@@ -5,8 +5,19 @@ services:
       context: ./server
       dockerfile: Dockerfile
     env_file: ./server/.env
+    depends_on:
+      - mongo
     volumes:
       - ./server:/app
       - /app/node_modules
     ports:
       - 8080:8080
+  mongo:
+    image: mongo:7
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
