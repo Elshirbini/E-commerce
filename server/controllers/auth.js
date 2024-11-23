@@ -165,11 +165,17 @@ export const addImage = async (req, res, next) => {
       folder: "Users",
     });
 
-    const userDoc = await User.findById(user._id);
+    const userDoc = await User.findByIdAndUpdate(
+      user._id,
+      {
+        image: { public_id: result.public_id, url: result.url },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!userDoc) return next(new ApiError("User not found", 404));
-
-    userDoc.image = { public_id: result.public_id, url: result.url };
-    await userDoc.save();
 
     res.status(200).json({
       message: "Image added successfully",

@@ -14,6 +14,8 @@ const coupon = new Schema(
     },
     discount: {
       type: Number,
+      min: [1, "Discount must be at least 1"],
+      max: [100, "Discount cannot exceed 100"],
       required: true,
     },
   },

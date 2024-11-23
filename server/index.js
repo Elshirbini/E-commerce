@@ -1,14 +1,16 @@
 import express from "express";
-import { configDotenv } from "dotenv";
-import cors from "cors";
-import { authRoutes } from "./routes/auth.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import { configDotenv } from "dotenv";
+import { authRoutes } from "./routes/auth.js";
 import { productRoutes } from "./routes/product.js";
 import { cartRoutes } from "./routes/cart.js";
 import { ApiError } from "./utils/apiError.js";
 import { errorHandling } from "./middlewares/errorHandling.js";
 import { dbConnection } from "./config/dbConnection.js";
 import { couponRoutes } from "./routes/coupon.js";
+import { favoritesRoutes } from "./routes/favorites.js";
+import { categoryRoutes } from "./routes/category.js";
 configDotenv();
 const app = express();
 app.use(
@@ -25,6 +27,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/coupon", couponRoutes);
+app.use("/api/favorites", favoritesRoutes);
+app.use("/api/category", categoryRoutes);
 
 app.get("/", (req, res) => res.send("Hello from dockerrrr"));
 app.use("/favicon.ico", express.static("./favicon.ico"));

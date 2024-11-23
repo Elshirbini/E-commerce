@@ -19,8 +19,8 @@ const product = new Schema(
       default: [],
     },
     category: {
-      type: String,
-      enum: ["Hoodie", "Pantaloon", "Jacket", "T-shirt"],
+      type: Schema.Types.ObjectId,
+      required: true,
     },
     brand: {
       type: String,

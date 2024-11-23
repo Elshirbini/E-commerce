@@ -1,10 +1,18 @@
-import express from "express"
-import { verifyToken } from "../middlewares/verifyToken.js"
-import { isAdmin } from "../middlewares/isAdmin.js"
-import { createCoupon } from "../controllers/coupon.js"
+import express from "express";
+import { verifyToken } from "../middlewares/verifyToken.js";
+import { isAdmin } from "../middlewares/isAdmin.js";
+import {
+  createCoupon,
+  deleteCoupon,
+  getAllCoupons,
+  updateCoupon,
+} from "../controllers/coupon.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.post("/create-coupon" , verifyToken , isAdmin , createCoupon)
+router.get("/get-all-coupons", verifyToken, isAdmin, getAllCoupons);
+router.post("/create-coupon", verifyToken, isAdmin, createCoupon);
+router.patch("/update-coupon/:couponId", verifyToken, isAdmin, updateCoupon);
+router.delete("/delete-coupon/:couponId", verifyToken, isAdmin, deleteCoupon);
 
-export const couponRoutes = router
+export const couponRoutes = router;

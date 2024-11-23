@@ -22,8 +22,14 @@ const user = new Schema(
       required: true,
     },
     image: {
-      type: Object,
-      default: null,
+      public_id: {
+        type: String,
+        required: true,
+      },
+      url: {
+        type: String,
+        required: true,
+      },
     },
     color: {
       type: Number,
@@ -34,6 +40,12 @@ const user = new Schema(
       type: Schema.Types.ObjectId,
       ref: "carts",
     },
+    favorites: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "products",
+      },
+    ],
     role: {
       type: String,
       enum: ["admin", "user"],
