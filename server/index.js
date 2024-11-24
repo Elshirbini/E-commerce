@@ -12,6 +12,7 @@ import { couponRoutes } from "./routes/coupon.js";
 import { favoritesRoutes } from "./routes/favorites.js";
 import { categoryRoutes } from "./routes/category.js";
 import { brandRoutes } from "./routes/brand.js";
+import { addressesRoutes } from "./routes/addresses.js";
 configDotenv();
 const app = express();
 app.use(
@@ -35,6 +36,7 @@ app.use("/api/coupon", couponRoutes);
 app.use("/api/favorites", favoritesRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/brand", brandRoutes);
+app.use("/api/addresses", addressesRoutes);
 
 app.use("/favicon.ico", express.static("./favicon.ico"));
 

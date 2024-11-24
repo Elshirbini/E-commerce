@@ -51,6 +51,15 @@ const user = new Schema(
       enum: ["admin", "user"],
       default: "user",
     },
+    addresses: [
+      {
+        id: { type: Schema.Types.ObjectId },
+        city: String,
+        details: String,
+        phone: String,
+        postalCode: String,
+      },
+    ],
     passwordResetToken: {
       type: String,
     },
