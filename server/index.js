@@ -11,6 +11,7 @@ import { dbConnection } from "./config/dbConnection.js";
 import { couponRoutes } from "./routes/coupon.js";
 import { favoritesRoutes } from "./routes/favorites.js";
 import { categoryRoutes } from "./routes/category.js";
+import { brandRoutes } from "./routes/brand.js";
 configDotenv();
 const app = express();
 app.use(
@@ -23,14 +24,18 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
+//                         **  ROUTES **
+
+app.get("/", (req, res) => res.send("Hello from dockerrrr"));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/api/favorites", favoritesRoutes);
 app.use("/api/category", categoryRoutes);
+app.use("/api/brand", brandRoutes);
 
-app.get("/", (req, res) => res.send("Hello from dockerrrr"));
 app.use("/favicon.ico", express.static("./favicon.ico"));
 
 app.all("*", (req, res, next) => {

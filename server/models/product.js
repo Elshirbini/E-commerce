@@ -23,18 +23,8 @@ const product = new Schema(
       required: true,
     },
     brand: {
-      type: String,
-      enum: [
-        "Defacto",
-        "H&M",
-        "Nike",
-        "Gucci",
-        "Crocs",
-        "Tommy Hilfiger",
-        "Versace",
-        "Adidas",
-      ],
-      default: "Unknown brand",
+      type: Schema.Types.ObjectId,
+      ref: "brands",
     },
     sizes: {
       type: [String],

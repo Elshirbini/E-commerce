@@ -21,6 +21,7 @@ export const createCategory = async (req, res, next) => {
     const { name } = req.body;
     const image = req.file.path;
 
+    if (!image) return next(new ApiError("Image is required"));
     if (!user) return next(new ApiError("User not found", 404));
 
     const result = await cloudinary.uploader.upload(image, {
