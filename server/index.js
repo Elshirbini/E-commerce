@@ -26,7 +26,7 @@ app.use(express.json());
 
 //                         **  ROUTES **
 
-app.get("/", (req, res) => res.send("Hello from dockerrrr"));
+app.get("/", (req, res) => res.send("Hello from docker"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
