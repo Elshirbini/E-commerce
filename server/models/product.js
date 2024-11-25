@@ -38,6 +38,10 @@ const product = new Schema(
     discount: {
       type: Number,
     },
+    sold : {
+      type: Number,
+      default : 0
+    },
     user: {
       type: Schema.Types.ObjectId,
       ref: "users",
