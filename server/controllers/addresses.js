@@ -72,19 +72,6 @@ export const updateAddress = async (req, res, next) => {
     );
     if (!userData) return next(new ApiError("User or address not found", 404));
 
-    // const addressIndex = userData.addresses.findIndex((ele) => {
-    //   return ele._id.toString() === addressId;
-    // });
-
-    // userData.addresses[addressIndex] = {
-    //   ...userData.addresses[addressIndex],
-    //   city,
-    //   phone,
-    //   details,
-    //   postalCode,
-    // };
-
-    // await userData.save();
 
     res.status(200).json({
       message: "Address updated successfully",
