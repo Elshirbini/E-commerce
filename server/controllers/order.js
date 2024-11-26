@@ -17,6 +17,19 @@ export const getOrder = async (req, res, next) => {
   }
 };
 
+export const getAllOrders = async (req, res, next) => {
+  try {
+    const { user } = req.user;
+    if (!user) return next(new ApiError("User not found", 404));
+
+    const orders = await Order.find();
+
+    res.status(200).json({ orders });
+  } catch (error) {
+    next(new ApiError(error, 500));
+  }
+};
+
 export const createCashOrder = async (req, res, next) => {
   try {
     const { user } = req.user;
@@ -65,6 +78,54 @@ export const createCashOrder = async (req, res, next) => {
     }
 
     res.status(201).json({ message: "Order created successfully", order });
+  } catch (error) {
+    next(new ApiError(error, 500));
+  }
+};
+
+export const updateOrderToPaid = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const { user } = req.user;
+
+    if (!user) return next(new ApiError("User not found", 404));
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        isPaid: true,
+        paidAt: Date.now(),
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedOrder) return next(new ApiError("Order not found", 404));
+
+    res.status(200).json({ updatedOrder });
+  } catch (error) {
+    next(new ApiError(error, 500));
+  }
+};
+
+export const updateOrderToDelivered = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const { user } = req.user;
+
+    if (!user) return next(new ApiError("User not found", 404));
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        isDelivered: true,
+        deliveredAt: Date.now(),
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedOrder) return next(new ApiError("Order not found", 404));
+
+    res.status(200).json({ updatedOrder });
   } catch (error) {
     next(new ApiError(error, 500));
   }
