@@ -4,6 +4,19 @@ import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import { ApiError } from "../utils/apiError.js";
 
+export const getOrder = async (req, res, next) => {
+  try {
+    const { user } = req.user;
+
+    const order = await Order.find({ userId: user._id });
+    if (!order) return next(new ApiError("User or order not found.", 404));
+
+    res.status(200).json({ order });
+  } catch (error) {
+    next(new ApiError(error, 500));
+  }
+};
+
 export const createCashOrder = async (req, res, next) => {
   try {
     const { user } = req.user;
