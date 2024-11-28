@@ -1,6 +1,10 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import mongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
+import rateLimit from "express-rate-limit";
+import compression from "compression";
 import { configDotenv } from "dotenv";
 import { authRoutes } from "./routes/auth.js";
 import { productRoutes } from "./routes/product.js";
@@ -24,9 +28,27 @@ app.use(
     credentials: true,
   })
 );
+app.use(compression());
 app.post("/webhook", express.raw({ type: "application/json" }), webhook);
 app.use(cookieParser());
 app.use(express.json());
+app.use(xss());
+app.use(mongoSanitize());
+const apiLimiter = rateLimit({
+  max: 300,
+  windowMs: 15 * 60 * 1000,
+  message: "Too many requests from this IP, please try again after 15 minutes!",
+});
+
+const loginLimiter = rateLimit({
+  max: 20,
+  windowMs: 15 * 60 * 1000,
+  message:
+    "Too many login attempts from this IP, please try again after 15 minutes!",
+});
+
+app.use("/api", apiLimiter);
+app.use("/api/auth", loginLimiter);
 
 //                         **  ROUTES **
 
@@ -45,7 +67,7 @@ app.use("/api/order", orderRoutes);
 app.use("/favicon.ico", express.static("./favicon.ico"));
 
 app.all("*", (req, res, next) => {
-  next(new ApiError(`Can't find this route : ${req.url}`, 400));
+  next(new ApiError(`Can't find this route : ${req.originalUrl}`, 400));
 });
 
 app.use(errorHandling);
