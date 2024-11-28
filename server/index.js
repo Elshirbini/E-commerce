@@ -24,11 +24,7 @@ app.use(
     credentials: true,
   })
 );
-app.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }),
-  webhook
-);
+app.post("/webhook", express.raw({ type: "application/json" }), webhook);
 app.use(cookieParser());
 app.use(express.json());
 

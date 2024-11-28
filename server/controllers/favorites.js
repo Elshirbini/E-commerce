@@ -1,73 +1,62 @@
+import asyncHandler from "express-async-handler";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
 import { ApiError } from "../utils/apiError.js";
 
-export const getAllFavorites = async (req, res, next) => {
-  try {
-    const { user } = req.user;
+export const getAllFavorites = asyncHandler(async (req, res, next) => {
+  const { user } = req.user;
 
-    const userData = await User.findById(user._id).populate("favorites");
+  const userData = await User.findById(user._id).populate("favorites");
 
-    if (!userData) return next(new ApiError("User not found", 404));
+  if (!userData) throw new ApiError("User not found", 404);
 
-    res.status(200).json({ products: userData.favorites });
-  } catch (error) {
-    next(new ApiError(error, 500));
-  }
-};
+  res.status(200).json({ products: userData.favorites });
+});
 
-export const addToFavorites = async (req, res, next) => {
-  try {
-    const { user } = req.user;
-    const { productId } = req.params;
+export const addToFavorites = asyncHandler(async (req, res, next) => {
+  const { user } = req.user;
+  const { productId } = req.params;
 
-    const product = await Product.findById(productId);
+  const product = await Product.findById(productId);
 
-    if (!product) return next(new ApiError("Product not found"));
+  if (!product) throw new ApiError("Product not found", 404);
 
-    const userData = await User.findByIdAndUpdate(
-      user._id,
-      {
-        $push: { favorites: productId },
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+  const userData = await User.findByIdAndUpdate(
+    user._id,
+    {
+      $push: { favorites: productId },
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
-    if (!userData) return next(new ApiError("User not found"));
+  if (!userData) throw new ApiError("User not found", 404);
 
-    res.status(200).json({
-      message: "Product Added to favorites successfully",
-      favorites: userData.favorites,
-    });
-  } catch (error) {
-    next(new ApiError(error, 404));
-  }
-};
+  res.status(200).json({
+    message: "Product Added to favorites successfully",
+    favorites: userData.favorites,
+  });
+});
 
-export const removeFromFavorites = async (req, res, next) => {
-  try {
-    const { user } = req.user;
-    const { productId } = req.params;
-    const product = await Product.findById(productId);
-    if (!product) return next(new ApiError("Product not found", 404));
+export const removeFromFavorites = asyncHandler(async (req, res, next) => {
+  const { user } = req.user;
+  const { productId } = req.params;
+  const product = await Product.findById(productId);
+  if (!product) throw new ApiError("Product not found", 404);
 
-    const userData = await User.findByIdAndUpdate(
-      user._id,
-      {
-        $pull: { favorites: productId },
-      },
-      { new: true, runValidators: true }
-    );
+  const userData = await User.findByIdAndUpdate(
+    user._id,
+    {
+      $pull: { favorites: productId },
+    },
+    { new: true, runValidators: true }
+  );
 
-    if (!userData) return next(new ApiError("User not found"));
+  if (!userData) throw new ApiError("User not found");
 
-    res
-      .status(200)
-      .json({ message: "Product removed from favorites successfully" });
-  } catch (error) {
-    next(new ApiError(error, 500));
-  }
-};
+  res
+    .status(200)
+    .json({ message: "Product removed from favorites successfully" });
+});

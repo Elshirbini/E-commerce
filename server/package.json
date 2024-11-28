@@ -21,6 +21,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "express-async-handler": "^1.2.0",
     "express-validator": "^7.2.0",
     "generate-backend-structure": "^1.1.4",
     "jsonwebtoken": "^9.0.2",

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-export const verifyToken = (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
   let token;
   if (req.headers.cookie) {
     token = req.headers.cookie.split("jwt=")[1];
