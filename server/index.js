@@ -14,6 +14,7 @@ import { categoryRoutes } from "./routes/category.js";
 import { brandRoutes } from "./routes/brand.js";
 import { addressesRoutes } from "./routes/addresses.js";
 import { orderRoutes } from "./routes/order.js";
+import { webhook } from "./controllers/order.js";
 configDotenv();
 const app = express();
 app.use(
@@ -22,6 +23,11 @@ app.use(
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })
+);
+app.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  webhook
 );
 app.use(cookieParser());
 app.use(express.json());
@@ -43,7 +49,7 @@ app.use("/api/order", orderRoutes);
 app.use("/favicon.ico", express.static("./favicon.ico"));
 
 app.all("*", (req, res, next) => {
-  next(new ApiError(`Can't find this route : ${req.originalUrl}`, 400));
+  next(new ApiError(`Can't find this route : ${req.url}`, 400));
 });
 
 app.use(errorHandling);
