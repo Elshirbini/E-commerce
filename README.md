@@ -1,0 +1,54 @@
+# E-commerce API Docker Image
+
+This repository provides a Docker image for the E-commerce API. You can easily deploy this API by using Docker.
+
+## Prerequisites
+
+- Docker installed on your machine. You can download and install Docker from [here](https://www.docker.com/get-started).
+
+## How to Use
+
+### 1. Pull the Docker Image
+
+To get started, pull the latest version of the Docker image from Docker Hub by running the following command:
+
+```bash
+
+docker pull elshirbini/e-commerce-api:latest
+
+```
+
+### 2. Run the Docker Container
+
+After pulling the image, run it with the following command:
+
+```bash
+docker run -d -p 8080:8080 --name ecommerce-api elshirbini/e-commerce-api:latest
+
+Explanation:
+	•	-d: Runs the container in detached mode (in the background).
+	•	-p 8080:8080: Maps port 8080 on your local machine to port 8080 in the container, allowing access to the API.
+	•	--name ecommerce-api: Assigns the name ecommerce-api to your running container.
+	•	elshirbini/e-commerce-api:latest: Specifies the image to use.
+
+```
+
+### 3. Access the API
+
+Once the container is running, you can access the API by navigating to: http://localhost:8080
+
+### 4. Stop the Running Container
+
+If you want to stop the container, use the following command:
+
+```bash
+docker stop ecommerce-api
+```
+
+### 5. Remove the Container
+
+To remove the stopped container, run:
+
+```bash
+docker rm ecommerce-api
+```
