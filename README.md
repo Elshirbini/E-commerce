@@ -24,13 +24,6 @@ After pulling the image, run it with the following command:
 
 ```bash
 docker run -d -p 8080:8080 --name ecommerce-api elshirbini/e-commerce-api:latest
-
-Explanation:
-	•	-d: Runs the container in detached mode (in the background).
-	•	-p 8080:8080: Maps port 8080 on your local machine to port 8080 in the container, allowing access to the API.
-	•	--name ecommerce-api: Assigns the name ecommerce-api to your running container.
-	•	elshirbini/e-commerce-api:latest: Specifies the image to use.
-
 ```
 
 ### 3. Access the API
