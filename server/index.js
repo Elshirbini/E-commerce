@@ -52,7 +52,9 @@ app.use("/api/auth", loginLimiter);
 
 //                         **  ROUTES **
 
-app.get("/", (req, res) => res.send("Hello from docker"));
+app.get("/", (req, res) =>
+  res.send("<a href='/api/auth/google'>Authenticate with google </a>")
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);

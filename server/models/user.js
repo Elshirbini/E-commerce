@@ -1,7 +1,12 @@
 import { model, Schema } from "mongoose";
+import { ApiError } from "../utils/apiError.js";
 
 const user = new Schema(
   {
+    googleId: {
+      type: String,
+      unique: true,
+    },
     firstName: {
       type: String,
       required: true,
@@ -20,16 +25,13 @@ const user = new Schema(
     },
     password: {
       type: String,
-      required: true,
     },
     image: {
       public_id: {
         type: String,
-        required: true,
       },
       url: {
         type: String,
-        required: true,
       },
     },
     color: {
@@ -70,5 +72,12 @@ const user = new Schema(
   },
   { timestamps: true }
 );
+
+user.pre("save", function (next) {
+  if (!this.googleId && !this.password) {
+    return next(new ApiError("Please provide password", 401));
+  }
+  next();
+});
 
 export const User = model("users", user);

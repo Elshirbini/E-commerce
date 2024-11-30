@@ -14,11 +14,16 @@ import {
   validateTokenSent,
   resetPassword,
   updateProfile,
+  oAuthCallback,
 } from "../controllers/auth.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
+import { oAuthenticated, oCallback } from "../middlewares/passportOauth.js";
 const router = express.Router();
 
 router.get("/get-user-info", verifyToken, getUserInfo);
+
+router.get("/google", oAuthenticated);
+router.get("/google/callback", oCallback, oAuthCallback);
 
 router.post(
   "/signup",

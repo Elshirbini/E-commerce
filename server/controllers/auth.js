@@ -28,6 +28,17 @@ export const getUserInfo = asyncHandler(async (req, res, next) => {
   res.status(200).json({ userDoc });
 });
 
+export const oAuthCallback = asyncHandler(async (req, res, next) => {
+  const { token } = req.user;
+
+  res.cookie("jwt", token, {
+    maxAge,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+  res.status(200).redirect("/");
+});
+
 export const signup = asyncHandler(async (req, res, next) => {
   const { firstName, lastName, email, password, confirmPassword } = req.body;
   const errors = validationResult(req);
