@@ -11,6 +11,13 @@ import { ApiError } from "../utils/apiError.js";
 const maxAge = 1 * 24 * 60 * 60 * 1000;
 // Days * hours per day * minutes per hour * seconds per minute * milliseconds per second
 
+const cookieOptions = {
+  maxAge,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "None",
+};
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -31,11 +38,7 @@ export const getUserInfo = asyncHandler(async (req, res, next) => {
 export const oAuthCallback = asyncHandler(async (req, res, next) => {
   const { token } = req.user;
 
-  res.cookie("jwt", token, {
-    maxAge,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-  });
+  res.cookie("jwt", token, cookieOptions);
   res.status(200).redirect("/");
 });
 
@@ -66,11 +69,7 @@ export const signup = asyncHandler(async (req, res, next) => {
     expiresIn: maxAge,
   });
 
-  res.cookie("jwt", token, {
-    maxAge,
-    secure: true,
-    sameSite: "None",
-  });
+  res.cookie("jwt", token, cookieOptions);
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
@@ -110,7 +109,7 @@ export const login = asyncHandler(async (req, res, next) => {
     expiresIn: maxAge,
   });
 
-  res.cookie("jwt", accessToken, { maxAge, secure: true, sameSite: "None" });
+  res.cookie("jwt", accessToken, cookieOptions);
 
   res.status(200).json({
     user: {
