@@ -4,6 +4,7 @@ import cors from "cors";
 import mongoSanitize from "express-mongo-sanitize";
 import xss from "xss-clean";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 import compression from "compression";
 import { configDotenv } from "dotenv";
 import { authRoutes } from "./routes/auth.js";
@@ -32,6 +33,7 @@ app.use(compression());
 app.post("/webhook", express.raw({ type: "application/json" }), webhook);
 app.use(cookieParser());
 app.use(express.json());
+app.use(helmet());
 app.use(xss());
 app.use(mongoSanitize());
 const apiLimiter = rateLimit({
