@@ -1,15 +1,16 @@
 import jwt from "jsonwebtoken";
+import { ApiError } from "../utils/apiError";
 
 export const verifyToken = async (req, res, next) => {
   let token;
   if (req.headers.cookie) {
     token = req.headers.cookie.split("jwt=")[1];
   }
-  if (!token) {
-    return res.status(400).send("You are not authenticated");
-  }
+
+  if (!token) return next(new ApiError("You are not authenticated", 400));
+
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
-    if (err) res.status(401).send("Token is not valid");
+    if (err) return next(new ApiError("Token is not valid", 401));
     req.user = user;
     next();
   });
