@@ -49,8 +49,8 @@ const loginLimiter = rateLimit({
     "Too many login attempts from this IP, please try again after 15 minutes!",
 });
 
-app.use("/api", apiLimiter);
 app.use("/api/auth", loginLimiter);
+app.use("/api", apiLimiter);
 
 //                         **  ROUTES **
 

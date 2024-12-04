@@ -15,7 +15,6 @@ const cookieOptions = {
   maxAge,
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "None",
 };
 
 const transporter = nodemailer.createTransport({
