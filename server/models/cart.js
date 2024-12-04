@@ -19,9 +19,7 @@ const cart = new Schema(
         },
       },
     ],
-    totalCost: {
-      type: Number,
-    },
+    totalCost: Number,
     userId: {
       type: Schema.Types.ObjectId,
       ref: "users",

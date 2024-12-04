@@ -35,12 +35,10 @@ const product = new Schema(
       type: Number,
       required: true,
     },
-    discount: {
+    discount: Number,
+    sold: {
       type: Number,
-    },
-    sold : {
-      type: Number,
-      default : 0
+      default: 0,
     },
     user: {
       type: Schema.Types.ObjectId,

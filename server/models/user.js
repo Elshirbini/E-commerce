@@ -17,22 +17,17 @@ const user = new Schema(
     },
     userName: {
       type: String,
+      unique: true,
     },
     email: {
       type: String,
       unique: true,
       required: true,
     },
-    password: {
-      type: String,
-    },
+    password: String,
     image: {
-      public_id: {
-        type: String,
-      },
-      url: {
-        type: String,
-      },
+      public_id: String,
+      url: String,
     },
     color: {
       type: Number,
@@ -63,12 +58,8 @@ const user = new Schema(
         postalCode: String,
       },
     ],
-    passwordResetToken: {
-      type: String,
-    },
-    passwordResetTokenExpire: {
-      type: Date,
-    },
+    passwordResetToken: String,
+    passwordResetTokenExpire: Date,
   },
   { timestamps: true }
 );
