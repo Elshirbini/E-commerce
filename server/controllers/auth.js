@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import asyncHandler from "express-async-handler";
@@ -7,6 +6,7 @@ import { validationResult } from "express-validator";
 import { User } from "../models/user.js";
 import { cloudinary } from "../config/cloudinary.js";
 import { ApiError } from "../utils/apiError.js";
+import { sendToEmails } from "../utils/sendToEmails.js";
 
 const maxAge = 1 * 24 * 60 * 60 * 1000;
 // Days * hours per day * minutes per hour * seconds per minute * milliseconds per second
@@ -16,14 +16,6 @@ const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
 };
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "ahmedalshirbini33@gmail.com",
-    pass: "rvgedkbbviilneor",
-  },
-});
 
 export const getUserInfo = asyncHandler(async (req, res, next) => {
   const { user } = req.user;
@@ -50,12 +42,6 @@ export const signup = asyncHandler(async (req, res, next) => {
 
   if (!errors.isEmpty()) throw new ApiError(errors.array()[0].msg, 400);
 
-  const mailOptions = {
-    from: "ahmedalshirbini33@gmail.com",
-    to: email,
-    subject: "Welcome for you in my E-commerce App",
-    text: " Your account Created Successfully",
-  };
   const hashedPassword = await bcrypt.hash(password, 12);
   const user = await User.create({
     firstName,
@@ -68,15 +54,13 @@ export const signup = asyncHandler(async (req, res, next) => {
     expiresIn: maxAge,
   });
 
-  res.cookie("jwt", token, cookieOptions);
+  sendToEmails(
+    email,
+    "Welcome for you in my E-commerce App",
+    "Your account Created Successfully"
+  );
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log("Email sent: " + info.response);
-    }
-  });
+  res.cookie("jwt", token, cookieOptions);
 
   return res.status(200).json({
     user: {
