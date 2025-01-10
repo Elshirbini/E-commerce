@@ -258,6 +258,8 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
 
   if (!user) throw new ApiError("User not found", 404);
 
+  res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: "none" });
+
   res.status(200).json({ message: "Password changed successfully" });
 });
 
