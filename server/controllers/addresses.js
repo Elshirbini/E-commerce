@@ -1,8 +1,7 @@
-import asyncHandler from "express-async-handler";
 import { User } from "../models/user.js";
 import { ApiError } from "../utils/apiError.js";
 
-export const getAddresses = asyncHandler(async (req, res, next) => {
+export const getAddresses = async (req, res, next) => {
   const { user } = req.user;
 
   const addresses = await User.findById(user._id).populate("addresses");
@@ -11,9 +10,9 @@ export const getAddresses = asyncHandler(async (req, res, next) => {
     throw new ApiError("User or addresses not found", 404);
 
   res.status(200).json({ addresses: addresses.addresses });
-});
+};
 
-export const addAddress = asyncHandler(async (req, res, next) => {
+export const addAddress = async (req, res, next) => {
   const { city, phone, postalCode, details } = req.body;
   const { user } = req.user;
 
@@ -35,9 +34,9 @@ export const addAddress = asyncHandler(async (req, res, next) => {
     message: "Address added successfully",
     addresses: userData.addresses,
   });
-});
+};
 
-export const updateAddress = asyncHandler(async (req, res, next) => {
+export const updateAddress = async (req, res, next) => {
   const { addressId } = req.params;
   const { city, phone, postalCode, details } = req.body;
   const { user } = req.user;
@@ -66,9 +65,9 @@ export const updateAddress = asyncHandler(async (req, res, next) => {
     message: "Address updated successfully",
     Addresses: userData.addresses,
   });
-});
+};
 
-export const removeAddress = asyncHandler(async (req, res, next) => {
+export const removeAddress = async (req, res, next) => {
   const { addressId } = req.params;
   const { user } = req.user;
 
@@ -83,4 +82,4 @@ export const removeAddress = asyncHandler(async (req, res, next) => {
   if (!userData) throw new ApiError("User not found", 404);
 
   res.status(200).json({ message: "Address removed successfully" });
-});
+};

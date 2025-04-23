@@ -1,4 +1,3 @@
-import asyncHandler from "express-async-handler";
 import { Cart } from "../models/cart.js";
 import { Coupon } from "../models/coupon.js";
 import { Order } from "../models/order.js";
@@ -8,24 +7,24 @@ import { ApiError } from "../utils/apiError.js";
 import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export const getOrder = asyncHandler(async (req, res, next) => {
+export const getOrder = async (req, res, next) => {
   const { user } = req.user;
   const order = await Order.find({ userId: user._id });
   if (!order) throw new ApiError("User or order not found.", 404);
 
   res.status(200).json({ order });
-});
+};
 
-export const getAllOrders = asyncHandler(async (req, res, next) => {
+export const getAllOrders = async (req, res, next) => {
   const { user } = req.user;
   if (!user) throw new ApiError("User not found", 404);
 
   const orders = await Order.find();
 
   res.status(200).json({ orders });
-});
+};
 
-export const createCashOrder = asyncHandler(async (req, res, next) => {
+export const createCashOrder = async (req, res, next) => {
   const { user } = req.user;
   const { couponCode, shippingAddress } = req.body;
   let totalPrice;
@@ -71,9 +70,9 @@ export const createCashOrder = asyncHandler(async (req, res, next) => {
   }
 
   res.status(201).json({ message: "Order created successfully", order });
-});
+};
 
-export const updateOrderToPaid = asyncHandler(async (req, res, next) => {
+export const updateOrderToPaid = async (req, res, next) => {
   const { orderId } = req.params;
   const { user } = req.user;
 
@@ -91,9 +90,9 @@ export const updateOrderToPaid = asyncHandler(async (req, res, next) => {
   if (!updatedOrder) throw new ApiError("Order not found", 404);
 
   res.status(200).json({ updatedOrder });
-});
+};
 
-export const updateOrderToDelivered = asyncHandler(async (req, res, next) => {
+export const updateOrderToDelivered = async (req, res, next) => {
   const { orderId } = req.params;
   const { user } = req.user;
 
@@ -111,9 +110,9 @@ export const updateOrderToDelivered = asyncHandler(async (req, res, next) => {
   if (!updatedOrder) throw new ApiError("Order not found", 404);
 
   res.status(200).json({ updatedOrder });
-});
+};
 
-export const checkoutSession = asyncHandler(async (req, res, next) => {
+export const checkoutSession = async (req, res, next) => {
   const { user } = req.user;
   const { couponCode, shippingAddress } = req.body;
   let totalPrice;
@@ -162,9 +161,9 @@ export const checkoutSession = asyncHandler(async (req, res, next) => {
   }
 
   res.status(201).json({ message: "session Created successfully", session });
-});
+};
 
-const createCardOrder = asyncHandler(async (session) => {
+const createCardOrder = async (session) => {
   const cartId = session.client_reference_id;
   const email = session.customer_email;
   const shippingAddress = session.metadata;
@@ -199,9 +198,9 @@ const createCardOrder = asyncHandler(async (session) => {
 
     await Cart.findByIdAndDelete(cartId);
   }
-});
+};
 
-export const webhook = asyncHandler(async (req, res, next) => {
+export const webhook = async (req, res, next) => {
   const sig = req.headers["stripe-signature"];
   const endpointSecret = process.env.WEBHOOK_SECRET_KEY;
 
@@ -213,4 +212,4 @@ export const webhook = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({ message: "Success" });
-});
+};

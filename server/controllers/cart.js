@@ -1,10 +1,9 @@
-import asyncHandler from "express-async-handler";
 import { Cart } from "../models/cart.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
 import { ApiError } from "../utils/apiError.js";
 
-export const addToCart = asyncHandler(async (req, res, next) => {
+export const addToCart = async (req, res, next) => {
   const { user } = req.user;
   const { productId, quantity, price } = req.body;
 
@@ -84,9 +83,9 @@ export const addToCart = asyncHandler(async (req, res, next) => {
       .status(201)
       .json({ message: "Cart created successfully", cart: updatedCart });
   }
-});
+};
 
-export const getUserCart = asyncHandler(async (req, res, next) => {
+export const getUserCart = async (req, res, next) => {
   const { user } = req.user;
 
   if (!user) throw new ApiError("User not found", 404);
@@ -96,9 +95,9 @@ export const getUserCart = asyncHandler(async (req, res, next) => {
   );
 
   res.status(200).json({ cart: cart });
-});
+};
 
-export const removeFromCart = asyncHandler(async (req, res, next) => {
+export const removeFromCart = async (req, res, next) => {
   const { cartId, productId } = req.params;
   const { user } = req.user;
 
@@ -134,9 +133,9 @@ export const removeFromCart = asyncHandler(async (req, res, next) => {
   await cart.save();
 
   res.status(200).json({ message: "Product deleted from cart successfully" });
-});
+};
 
-export const updateQuantity = asyncHandler(async (req, res, next) => {
+export const updateQuantity = async (req, res, next) => {
   const { user } = req.user;
   const { cartId, productId } = req.params;
   const { quantity } = req.body;
@@ -180,4 +179,4 @@ export const updateQuantity = asyncHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ message: "Quantity updated successfully", cart: cart });
-});
+};

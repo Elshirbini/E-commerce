@@ -1,18 +1,17 @@
-import asyncHandler from "express-async-handler";
 import { cloudinary } from "../config/cloudinary.js";
 import { Category } from "../models/category.js";
 import { ApiError } from "../utils/apiError.js";
 
-export const getAllCategories = asyncHandler(async (req, res, next) => {
+export const getAllCategories = async (req, res, next) => {
   const { user } = req.user;
   if (!user) throw new ApiError("User not found", 404);
 
   const categories = await Category.find();
 
   res.status(200).json({ categories });
-});
+};
 
-export const createCategory = asyncHandler(async (req, res, next) => {
+export const createCategory = async (req, res, next) => {
   const { user } = req.user;
   const { name } = req.body;
   const image = req.file.path;
@@ -29,9 +28,9 @@ export const createCategory = asyncHandler(async (req, res, next) => {
   });
 
   res.status(200).json({ message: "Category created successfully", category });
-});
+};
 
-export const deleteCategory = asyncHandler(async (req, res, next) => {
+export const deleteCategory = async (req, res, next) => {
   const { user } = req.user;
   const { categoryId } = req.params;
 
@@ -43,4 +42,4 @@ export const deleteCategory = asyncHandler(async (req, res, next) => {
   await cloudinary.uploader.destroy(category.image.public_id);
 
   res.status(200).json({ message: "Category deleted successfully" });
-});
+};

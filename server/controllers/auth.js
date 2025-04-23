@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import asyncHandler from "express-async-handler";
 import { validationResult } from "express-validator";
 import { User } from "../models/user.js";
 import { cloudinary } from "../config/cloudinary.js";
@@ -17,23 +16,23 @@ const cookieOptions = {
   secure: process.env.NODE_ENV === "production",
 };
 
-export const getUserInfo = asyncHandler(async (req, res, next) => {
+export const getUserInfo = async (req, res, next) => {
   const { user } = req.user;
   const userDoc = await User.findById(user._id);
 
   if (!userDoc) throw new ApiError("User not found", 404);
 
   res.status(200).json({ userDoc });
-});
+};
 
-export const oAuthCallback = asyncHandler(async (req, res, next) => {
+export const oAuthCallback = async (req, res, next) => {
   const { token } = req.user;
 
   res.cookie("jwt", token, cookieOptions);
   res.status(200).redirect("/");
-});
+};
 
-export const signup = asyncHandler(async (req, res, next) => {
+export const signup = async (req, res, next) => {
   const { firstName, lastName, email, password, confirmPassword } = req.body;
   const errors = validationResult(req);
   if (password !== confirmPassword) {
@@ -69,9 +68,9 @@ export const signup = asyncHandler(async (req, res, next) => {
       email: user.email,
     },
   });
-});
+};
 
-export const login = asyncHandler(async (req, res, next) => {
+export const login = async (req, res, next) => {
   const { emailOrUserName, password } = req.body;
   if (!emailOrUserName.trim() || !password.trim()) {
     throw new ApiError("Email and Password mustn't be empty", 404);
@@ -101,14 +100,14 @@ export const login = asyncHandler(async (req, res, next) => {
       email: user.email,
     },
   });
-});
+};
 
-export const logout = asyncHandler(async (req, res, next) => {
+export const logout = async (req, res, next) => {
   res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: "None" });
   res.status(200).send("Logout successfully");
-});
+};
 
-export const deleteAccount = asyncHandler(async (req, res, next) => {
+export const deleteAccount = async (req, res, next) => {
   const { user } = req.user;
   const { password } = req.body;
 
@@ -123,9 +122,9 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
   await User.deleteOne({ _id: userDoc._id });
 
   res.status(200).send("Account deleted successfully");
-});
+};
 
-export const addImage = asyncHandler(async (req, res, next) => {
+export const addImage = async (req, res, next) => {
   const { user } = req.user;
   const image = req.file.path;
 
@@ -149,9 +148,9 @@ export const addImage = asyncHandler(async (req, res, next) => {
     message: "Image added successfully",
     image: result,
   });
-});
+};
 
-export const deleteImage = asyncHandler(async (req, res, next) => {
+export const deleteImage = async (req, res, next) => {
   const { user } = req.user;
   const userDoc = await User.findById(user._id);
 
@@ -162,9 +161,9 @@ export const deleteImage = asyncHandler(async (req, res, next) => {
   await userDoc.save();
 
   return res.status(200).json({ message: "Image deleted successfully" });
-});
+};
 
-export const sendTokenToEmail = asyncHandler(async (req, res, next) => {
+export const sendTokenToEmail = async (req, res, next) => {
   const { email } = req.body;
 
   const user = await User.findOne({ email: email });
@@ -207,9 +206,9 @@ export const sendTokenToEmail = asyncHandler(async (req, res, next) => {
     message: "Verification code sent successfully",
     userId: user._id,
   });
-});
+};
 
-export const validateTokenSent = asyncHandler(async (req, res, next) => {
+export const validateTokenSent = async (req, res, next) => {
   const { code } = req.body;
   const { userId } = req.params;
 
@@ -225,9 +224,9 @@ export const validateTokenSent = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({ message: "success", userId: user._id });
-});
+};
 
-export const resetPassword = asyncHandler(async (req, res, next) => {
+export const resetPassword = async (req, res, next) => {
   const { password, confirmPassword } = req.body;
   const { userId } = req.params;
   const errors = validationResult(req);
@@ -261,9 +260,9 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   res.cookie("jwt", "", { maxAge: 1, secure: true, sameSite: "none" });
 
   res.status(200).json({ message: "Password changed successfully" });
-});
+};
 
-export const updateProfile = asyncHandler(async (req, res, next) => {
+export const updateProfile = async (req, res, next) => {
   const { firstName, lastName, userName, color } = req.body;
   const { user } = req.user;
 
@@ -287,4 +286,4 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ message: "Profile updated successfully", user: userDoc });
-});
+};

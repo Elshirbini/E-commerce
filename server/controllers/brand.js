@@ -1,9 +1,8 @@
-import asyncHandler from "express-async-handler";
 import { cloudinary } from "../config/cloudinary.js";
 import { Brand } from "../models/brand.js";
 import { ApiError } from "../utils/apiError.js";
 
-export const getAllBrands = asyncHandler(async (req, res, next) => {
+export const getAllBrands = async (req, res, next) => {
   const { user } = req.user;
 
   if (!user) throw new ApiError("User not found", 404);
@@ -13,9 +12,9 @@ export const getAllBrands = asyncHandler(async (req, res, next) => {
   if (!brands) throw new ApiError("Brands not found", 404);
 
   res.status(200).json({ brands });
-});
+};
 
-export const createBrand = asyncHandler(async (req, res, next) => {
+export const createBrand = async (req, res, next) => {
   const { name } = req.body;
   const image = req.file.path;
   const { user } = req.user;
@@ -33,9 +32,9 @@ export const createBrand = asyncHandler(async (req, res, next) => {
   });
 
   res.status(201).json({ message: "Brand created successfully", brand });
-});
+};
 
-export const deleteBrand = asyncHandler(async (req, res, next) => {
+export const deleteBrand = async (req, res, next) => {
   const { brandId } = req.params;
   const { user } = req.user;
 
@@ -47,4 +46,4 @@ export const deleteBrand = asyncHandler(async (req, res, next) => {
   await cloudinary.uploader.destroy(brand.image.public_id);
 
   res.status(200).json({ message: "Brand deleted successfully" });
-});
+};

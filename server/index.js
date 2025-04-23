@@ -2,7 +2,6 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import mongoSanitize from "express-mongo-sanitize";
-import xss from "xss-clean";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import compression from "compression";
@@ -10,7 +9,6 @@ import { configDotenv } from "dotenv";
 import { authRoutes } from "./routes/auth.js";
 import { productRoutes } from "./routes/product.js";
 import { cartRoutes } from "./routes/cart.js";
-import { ApiError } from "./utils/apiError.js";
 import { errorHandling } from "./middlewares/errorHandling.js";
 import { dbConnection } from "./config/dbConnection.js";
 import { couponRoutes } from "./routes/coupon.js";
@@ -22,6 +20,9 @@ import { orderRoutes } from "./routes/order.js";
 import { webhook } from "./controllers/order.js";
 configDotenv();
 const app = express();
+
+//                                 **Middlewares**
+
 app.use(
   cors({
     origin: "*",
@@ -34,7 +35,6 @@ app.post("/webhook", express.raw({ type: "application/json" }), webhook);
 app.use(cookieParser());
 app.use(express.json());
 app.use(helmet());
-app.use(xss());
 app.use(mongoSanitize());
 const apiLimiter = rateLimit({
   max: 300,
@@ -68,11 +68,7 @@ app.use("/api/brand", brandRoutes);
 app.use("/api/addresses", addressesRoutes);
 app.use("/api/order", orderRoutes);
 
-app.use("/favicon.ico", express.static("./favicon.ico"));
-
-app.all("*", (req, res, next) => {
-  next(new ApiError(`Can't find this route : ${req.originalUrl}`, 400));
-});
+//                                 **Global error handler**
 
 app.use(errorHandling);
 
@@ -82,5 +78,10 @@ app.listen(8080, () => {
 
 process.on("unhandledRejection", (err) => {
   console.error(`Unhandled Rejection Errors : ${err.name} | ${err.message}`);
+  process.exit(1);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error(`Uncaught Exception Errors : ${err.name} | ${err.message}`);
   process.exit(1);
 });

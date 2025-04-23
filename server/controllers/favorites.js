@@ -1,9 +1,8 @@
-import asyncHandler from "express-async-handler";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
 import { ApiError } from "../utils/apiError.js";
 
-export const getAllFavorites = asyncHandler(async (req, res, next) => {
+export const getAllFavorites = async (req, res, next) => {
   const { user } = req.user;
 
   const userData = await User.findById(user._id).populate("favorites");
@@ -11,9 +10,9 @@ export const getAllFavorites = asyncHandler(async (req, res, next) => {
   if (!userData) throw new ApiError("User not found", 404);
 
   res.status(200).json({ products: userData.favorites });
-});
+};
 
-export const addToFavorites = asyncHandler(async (req, res, next) => {
+export const addToFavorites = async (req, res, next) => {
   const { user } = req.user;
   const { productId } = req.params;
 
@@ -38,9 +37,9 @@ export const addToFavorites = asyncHandler(async (req, res, next) => {
     message: "Product Added to favorites successfully",
     favorites: userData.favorites,
   });
-});
+};
 
-export const removeFromFavorites = asyncHandler(async (req, res, next) => {
+export const removeFromFavorites = async (req, res, next) => {
   const { user } = req.user;
   const { productId } = req.params;
   const product = await Product.findById(productId);
@@ -59,4 +58,4 @@ export const removeFromFavorites = asyncHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ message: "Product removed from favorites successfully" });
-});
+};

@@ -1,11 +1,10 @@
-import asyncHandler from "express-async-handler";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
 import { cloudinary } from "../config/cloudinary.js";
 import { ApiError } from "../utils/apiError.js";
 import { Cart } from "../models/cart.js";
 
-export const searchingProducts = asyncHandler(async (req, res, next) => {
+export const searchingProducts = async (req, res, next) => {
   const { user } = req.user;
   const { searchTerm } = req.body;
 
@@ -23,9 +22,9 @@ export const searchingProducts = asyncHandler(async (req, res, next) => {
   if (!products.length) throw new ApiError("No products found", 404);
 
   res.status(200).json({ product: products });
-});
+};
 
-export const createProduct = asyncHandler(async (req, res, next) => {
+export const createProduct = async (req, res, next) => {
   const { user } = req.user;
   const userId = user._id;
   const {
@@ -67,9 +66,9 @@ export const createProduct = asyncHandler(async (req, res, next) => {
   await product.save();
 
   res.status(201).json({ product: product });
-});
+};
 
-export const updateProduct = asyncHandler(async (req, res, next) => {
+export const updateProduct = async (req, res, next) => {
   const { user } = req.user;
   const { productId } = req.params;
   const {
@@ -119,9 +118,9 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ message: "Product updated successfully", product: product });
-});
+};
 
-export const addImages = asyncHandler(async (req, res, next) => {
+export const addImages = async (req, res, next) => {
   const { user } = req.user;
   const { productId } = req.params;
   const image = req.file.path;
@@ -152,9 +151,9 @@ export const addImages = asyncHandler(async (req, res, next) => {
   if (!product) throw new ApiError("Product not found", 404);
 
   res.status(200).json({ productImages: product.images });
-});
+};
 
-export const deleteImages = asyncHandler(async (req, res, next) => {
+export const deleteImages = async (req, res, next) => {
   const { productId } = req.params;
   const public_id = req.query.image;
 
@@ -172,9 +171,9 @@ export const deleteImages = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({ message: "Image deleted successfully" });
-});
+};
 
-export const deleteProduct = asyncHandler(async (req, res, next) => {
+export const deleteProduct = async (req, res, next) => {
   const { productId } = req.params;
 
   let product = await Product.findById(productId);
@@ -206,4 +205,4 @@ export const deleteProduct = asyncHandler(async (req, res, next) => {
   product = await Product.findByIdAndDelete(productId);
 
   res.status(200).json({ message: "Product deleted successfully" });
-});
+};

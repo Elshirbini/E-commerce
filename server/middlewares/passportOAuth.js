@@ -40,7 +40,7 @@ passport.use(
 );
 
 export const oAuthenticated = passport.authenticate("google", {
-  scope: ["email","profile"],
+  scope: ["email", "profile"],
   prompt: "consent", // لإعادة طلب الكود عند كل طلب
 });
 
