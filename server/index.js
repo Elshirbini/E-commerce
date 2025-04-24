@@ -21,21 +21,6 @@ import { webhook } from "./controllers/order.js";
 configDotenv();
 const app = express();
 
-//                                 **Middlewares**
-
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    credentials: true,
-  })
-);
-app.use(compression());
-app.post("/webhook", express.raw({ type: "application/json" }), webhook);
-app.use(cookieParser());
-app.use(express.json());
-app.use(helmet());
-app.use(mongoSanitize());
 const apiLimiter = rateLimit({
   max: 300,
   windowMs: 15 * 60 * 1000,
@@ -48,7 +33,25 @@ const loginLimiter = rateLimit({
   message:
     "Too many login attempts from this IP, please try again after 15 minutes!",
 });
+//                                 **Middlewares**
 
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
+  })
+);
+app.use(helmet());
+app.use(compression());
+app.post("/webhook", express.raw({ type: "application/json" }), webhook);
+app.use(cookieParser());
+app.use(express.json());
+app.use(
+  mongoSanitize({
+    replaceWith: "_",
+  })
+);
 app.use("/api/auth", loginLimiter);
 app.use("/api", apiLimiter);
 
