@@ -1,8 +1,8 @@
-import { Product } from "../models/product.js";
-import { User } from "../models/user.js";
+import { Product } from "./product.model.js";
+import { User } from "../auth/user.model.js";
 import { cloudinary } from "../config/cloudinary.js";
 import { ApiError } from "../utils/apiError.js";
-import { Cart } from "../models/cart.js";
+import { Cart } from "../cart/cart.model.js";
 
 export const searchingProducts = async (req, res, next) => {
   const { user } = req.user;

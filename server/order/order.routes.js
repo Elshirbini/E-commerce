@@ -8,7 +8,7 @@ import {
   getOrder,
   updateOrderToDelivered,
   updateOrderToPaid,
-} from "../controllers/order.js";
+} from "../order/order.controller.js";
 const router = express.Router();
 
 router.get("/get-order", verifyToken, getOrder);

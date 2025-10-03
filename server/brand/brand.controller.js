@@ -1,5 +1,5 @@
 import { cloudinary } from "../config/cloudinary.js";
-import { Brand } from "../models/brand.js";
+import { Brand } from "./brand.model.js";
 import { ApiError } from "../utils/apiError.js";
 
 export const getAllBrands = async (req, res, next) => {

@@ -1,8 +1,8 @@
-import { Cart } from "../models/cart.js";
-import { Coupon } from "../models/coupon.js";
-import { Order } from "../models/order.js";
-import { Product } from "../models/product.js";
-import { User } from "../models/user.js";
+import { Cart } from "../cart/cart.model.js";
+import { Coupon } from "../coupon/coupon.model.js";
+import { Order } from "../order/order.model.js";
+import { Product } from "../product/product.model.js";
+import { User } from "../auth/user.model.js";
 import { ApiError } from "../utils/apiError.js";
 import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);

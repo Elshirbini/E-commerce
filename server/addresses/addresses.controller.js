@@ -1,4 +1,4 @@
-import { User } from "../models/user.js";
+import { User } from "../auth/user.model.js";
 import { ApiError } from "../utils/apiError.js";
 
 export const getAddresses = async (req, res, next) => {

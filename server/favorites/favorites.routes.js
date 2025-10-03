@@ -4,7 +4,7 @@ import {
   addToFavorites,
   getAllFavorites,
   removeFromFavorites,
-} from "../controllers/favorites.js";
+} from "./favorites.controller.js";
 
 const router = express.Router();
 

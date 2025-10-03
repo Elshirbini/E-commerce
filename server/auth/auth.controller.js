@@ -2,13 +2,12 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { validationResult } from "express-validator";
-import { User } from "../models/user.js";
+import { User } from "./user.model.js";
 import { cloudinary } from "../config/cloudinary.js";
 import { ApiError } from "../utils/apiError.js";
 import { sendToEmails } from "../utils/sendToEmails.js";
 
 const maxAge = 1 * 24 * 60 * 60 * 1000;
-// Days * hours per day * minutes per hour * seconds per minute * milliseconds per second
 
 const cookieOptions = {
   maxAge,

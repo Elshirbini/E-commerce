@@ -6,7 +6,7 @@ import {
   createBrand,
   deleteBrand,
   getAllBrands,
-} from "../controllers/brand.js";
+} from "../brand/brand.controller.js";
 const router = express.Router();
 
 router.get("/get-all-brands", verifyToken, getAllBrands);

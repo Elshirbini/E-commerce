@@ -1,5 +1,5 @@
-import { Product } from "../models/product.js";
-import { User } from "../models/user.js";
+import { Product } from "../product/product.model.js";
+import { User } from "../auth/user.model.js";
 import { ApiError } from "../utils/apiError.js";
 
 export const getAllFavorites = async (req, res, next) => {

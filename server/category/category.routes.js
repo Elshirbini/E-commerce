@@ -5,7 +5,7 @@ import {
   createCategory,
   deleteCategory,
   getAllCategories,
-} from "../controllers/category.js";
+} from "./category.controller.js";
 import { upload } from "../config/multer.js";
 
 const router = express.Router();

@@ -1,4 +1,4 @@
-import { User } from "../models/user.js";
+import { User } from "../auth/user.model.js";
 
 export const isAdmin = async (req, res, next) => {
   const { user } = req.user;

@@ -5,7 +5,7 @@ import {
   getAddresses,
   removeAddress,
   updateAddress,
-} from "../controllers/addresses.js";
+} from "../addresses/addresses.controller.js";
 const router = express.Router();
 
 router.get("/get-addresses", verifyToken, getAddresses);

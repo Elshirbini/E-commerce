@@ -1,6 +1,6 @@
 import express from "express";
 import { body } from "express-validator";
-import { User } from "../models/user.js";
+import { User } from "./user.model.js";
 import { upload } from "../config/multer.js";
 import {
   login,
@@ -15,7 +15,7 @@ import {
   resetPassword,
   updateProfile,
   oAuthCallback,
-} from "../controllers/auth.js";
+} from "./auth.controller.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
 import { oAuthenticated, oCallback } from "../middlewares/passportOauth.js";
 const router = express.Router();

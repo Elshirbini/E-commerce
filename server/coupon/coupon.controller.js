@@ -1,4 +1,4 @@
-import { Coupon } from "../models/coupon.js";
+import { Coupon } from "../coupon/coupon.model.js";
 import { ApiError } from "../utils/apiError.js";
 import couponCode from "coupon-code";
 

@@ -1,5 +1,5 @@
 import { cloudinary } from "../config/cloudinary.js";
-import { Category } from "../models/category.js";
+import { Category } from "../category/category.model.js";
 import { ApiError } from "../utils/apiError.js";
 
 export const getAllCategories = async (req, res, next) => {

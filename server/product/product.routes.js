@@ -7,7 +7,7 @@ import {
   deleteProduct,
   searchingProducts,
   updateProduct,
-} from "../controllers/product.js";
+} from "./product.controller.js";
 import { isAdmin } from "../middlewares/isAdmin.js";
 import { upload } from "../config/multer.js";
 
@@ -31,7 +31,11 @@ router.post(
 );
 router.delete("/delete-images/:productId", verifyToken, isAdmin, deleteImages);
 
-router.delete("/delete-product/:productId", verifyToken, isAdmin , deleteProduct);
-
+router.delete(
+  "/delete-product/:productId",
+  verifyToken,
+  isAdmin,
+  deleteProduct
+);
 
 export const productRoutes = router;

@@ -1,6 +1,6 @@
-import { Cart } from "../models/cart.js";
-import { Product } from "../models/product.js";
-import { User } from "../models/user.js";
+import { Cart } from "../cart/cart.model.js";
+import { Product } from "../product/product.model.js";
+import { User } from "../auth/user.model.js";
 import { ApiError } from "../utils/apiError.js";
 
 export const addToCart = async (req, res, next) => {
