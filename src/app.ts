@@ -21,7 +21,10 @@ import { adminRoutes } from "./admin/admin.routes";
 import { couponRoutes } from "./coupon/coupon.routes";
 import { shippingTaxRoutes } from "./shippingTax/shippingTax.routes";
 import { pageRoutes } from "./page/page.routes";
+import { paymentRoutes } from "./payment/payment.routes";
 import "./cron/deleteUnconfirmedOrders";
+import { log } from "console";
+import { logger } from "./config/logger";
 
 configDotenv();
 
@@ -30,9 +33,15 @@ const app = express();
 //                        **Middlewares**
 
 app.set("trust proxy", 1);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(httpLoggerMiddleware);
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      (req as any).rawBody = buf;
+    },
+  }),
+);
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:8080"],
@@ -42,7 +51,6 @@ app.use(
 );
 app.use(cookieParser());
 app.use(sanitizeBody);
-app.use(httpLoggerMiddleware);
 app.use(compression());
 app.use(
   helmet({
@@ -78,6 +86,7 @@ app.use("/api/v1/settings", settingsRoutes);
 app.use("/api/v1/contact-us", contactUsRoutes);
 app.use("/api/v1/coupon", couponRoutes);
 app.use("/api/v1/order", orderRoutes);
+app.use("/api/v1/payment", paymentRoutes);
 app.use("/api/v1/shipping-tax", shippingTaxRoutes);
 app.use("/api/v1/pages", pageRoutes);
 

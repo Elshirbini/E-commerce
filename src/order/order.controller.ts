@@ -1,153 +1,19 @@
 import { Request, Response } from "express";
 import { ApiError } from "../utils/apiError";
-import { findUserById } from "../user/user.repository";
 import { findCartByUserId, saveCart } from "../cart/cart.repository";
 import { success } from "../utils/response";
 import {
-  createOrder,
   findOrderById,
   findOrderByIdAndUpdate,
   getOrders,
 } from "./order.repository";
-import { Types } from "mongoose";
-import { OrderDocument } from "./schemas/order.schema";
-import {
-  findProductById,
-  findProductsByIds,
-  saveProduct,
-} from "../product/product.repository";
-import { findCouponByCode } from "../coupon/coupon.repository";
-import { findShippingTaxByCountry } from "../shippingTax/shippingTax.repository";
+import { findProductById, saveProduct } from "../product/product.repository";
 import { EmailService } from "../email/email.service";
-
-export const createCashOrder = async (req: Request, res: Response) => {
-  const { firstName, lastName, phone, items, shippingAddress, coupon } =
-    req.body;
-  const userId = req.query.userId as string;
-  let productsToCheck: any[] = [];
-  let totalPrice: number = 0;
-  let invoice: any = {
-    items: [],
-  };
-
-  if (userId) {
-    const user = await findUserById(userId);
-    if (!user) throw new ApiError(req.__("User not found"), 404);
-
-    const cart = await findCartByUserId(user._id.toString());
-    if (!cart || cart.items.length === 0) {
-      throw new ApiError("Cart is empty", 400);
-    }
-
-    productsToCheck = cart.items;
-  } else {
-    if (!items || items.length === 0) {
-      throw new ApiError("No items provided", 400);
-    }
-
-    productsToCheck = items;
-  }
-
-  const productIds = productsToCheck.map((i) => i.productId);
-  const products = await findProductsByIds(productIds);
-
-  const invalidProducts: string[] = [];
-  const validItems: any[] = [];
-
-  for (const item of productsToCheck) {
-    const product = products.find(
-      (p) =>
-        p._id.toString() ===
-        (userId ? item.productId._id.toString() : item.productId.toString()),
-    );
-
-    if (!product) {
-      invalidProducts.push(`Product ${item.productId} not found`);
-      continue;
-    }
-
-    if (product.quantity < item.quantity) {
-      invalidProducts.push(`${product.name?.en} is out of stock`);
-      continue;
-    }
-
-    const currentPrice = product.finalPrice?.kwd!;
-    totalPrice = currentPrice * item.quantity;
-
-    validItems.push({
-      productId: product._id,
-      quantity: item.quantity,
-      price: currentPrice,
-      totalPrice,
-    });
-
-    invoice.items.push({
-      productId: product.name,
-      quantity: item.quantity,
-      price: +currentPrice.toFixed(2),
-      totalPrice: +totalPrice.toFixed(2),
-    });
-  }
-
-  if (invalidProducts.length > 0) {
-    throw new ApiError(
-      `Some products are invalid or unavailable: ${invalidProducts.join(", ")}`,
-      400,
-    );
-  }
-
-  totalPrice = validItems.reduce((acc, i) => acc + i.totalPrice, 0);
-  invoice.priceProducts = +totalPrice.toFixed(2);
-
-  if (shippingAddress.country) {
-    const shippingTax = await findShippingTaxByCountry(shippingAddress.country);
-    if (shippingTax) {
-      totalPrice = totalPrice + shippingTax.tax;
-      invoice.shippingAddress = shippingAddress.country;
-      invoice.shippingTax = shippingTax.tax;
-    }
-  }
-
-  if (coupon) {
-    const couponDoc = await findCouponByCode(coupon);
-    if (couponDoc) {
-      totalPrice = totalPrice - (totalPrice * couponDoc.discount) / 100;
-      invoice.coupon = couponDoc.code;
-      invoice.couponDiscount = couponDoc.discount;
-    }
-  }
-
-  const orderData: Partial<OrderDocument> = {
-    shippingAddress,
-    cartItems: validItems as any,
-    phone,
-    totalPrice,
-  };
-
-  if (userId) {
-    orderData.userId = new Types.ObjectId(userId);
-  } else {
-    orderData.firstName = firstName;
-    orderData.lastName = lastName;
-  }
-
-  const order = await createOrder(orderData);
-
-  invoice.totalPrice = +totalPrice.toFixed(2);
-  invoice.orderId = order._id;
-
-  return success(res, 201, "Order created successfully", invoice);
-};
+import { findLatestPaymentByOrderId } from "../payment/payment.repository";
 
 export const updateOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
   let orderData = req.body;
-
-  if (orderData.isPaid) {
-    orderData.paidAt = new Date(Date.now()).toLocaleString("en-KW");
-  } else {
-    orderData.paidAt = null;
-  }
 
   if (orderData.isDelivered) {
     orderData.deliveredAt = new Date(Date.now()).toLocaleString("en-KW");
@@ -198,8 +64,11 @@ export const confirmOrder = async (req: Request, res: Response) => {
     };
 
     const orderObj = order.toObject();
+    const payment = await findLatestPaymentByOrderId(order._id.toString());
     const orderForEmail = {
       ...orderObj,
+      paymentMethod: payment?.method === "stripe" ? "card" : "cash",
+      isPaid: payment?.status === "paid",
       cartItems: (orderObj.cartItems ?? []).map((item: any) => {
         const product = productsById.get(item.productId.toString());
         return {

@@ -1,6 +1,11 @@
 import { OrderDocument } from "../../order/schemas/order.schema";
 import { EmailTemplate } from "./email-template.interface";
 
+type OrderForEmail = Partial<OrderDocument> & {
+  paymentMethod?: "cash" | "card";
+  isPaid?: boolean;
+};
+
 const getLocalizedValue = (value: any) => {
   if (!value) return "";
   if (typeof value === "string") return value;
@@ -45,7 +50,7 @@ const renderProductDetails = (item: any) => {
 export class NewOrderTemplateForAdmin implements EmailTemplate {
   constructor(
     private readonly recipient: string,
-    private readonly order: Partial<OrderDocument>,
+    private readonly order: OrderForEmail,
     private readonly user?: { fullName: string; email: string },
   ) {}
 
@@ -69,7 +74,6 @@ export class NewOrderTemplateForAdmin implements EmailTemplate {
       shippingAddress,
     } = this.order || {};
 
-    // ✅ استخدم بيانات المستخدم لو بيانات الأوردر ناقصة
     const fullName =
       `${firstName ?? ""} ${lastName ?? ""}`.trim() ||
       this.user?.fullName ||
@@ -148,7 +152,7 @@ export class NewOrderTemplateForAdmin implements EmailTemplate {
 export class NewOrderTemplateForUser implements EmailTemplate {
   constructor(
     private readonly recipient: string,
-    private readonly order: Partial<OrderDocument>,
+    private readonly order: OrderForEmail,
     private readonly user?: { fullName: string; email: string },
   ) {}
 

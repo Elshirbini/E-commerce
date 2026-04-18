@@ -107,7 +107,6 @@ export const createCashOrderValidation = [
 ];
 
 export const updateOrderValidation = [
-  body("isPaid").optional().isBoolean().withMessage("isPaid must be a boolean"),
   body("isDelivered")
     .optional()
     .isBoolean()

@@ -45,17 +45,6 @@ const order = new Schema(
       type: Number,
       required: true,
     },
-    paymentMethod: {
-      type: String,
-      enum: ["cash", "card"],
-      default: "cash",
-      required: true,
-    },
-    isPaid: {
-      type: Boolean,
-      default: false,
-    },
-    paidAt: Date,
     isDelivered: {
       type: Boolean,
       default: false,
