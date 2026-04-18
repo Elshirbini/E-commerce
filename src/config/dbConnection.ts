@@ -1,5 +1,8 @@
 import { connect } from "mongoose";
 import { logger } from "./logger";
+import { configDotenv } from "dotenv";
+
+configDotenv();
 
 class Database {
   private static instance: Database;
