@@ -15,7 +15,7 @@ import {
   saveUser,
 } from "../user/user.repository";
 
-configDotenv();
+// configDotenv();
 
 passport.use(
   new GoogleStrategy(

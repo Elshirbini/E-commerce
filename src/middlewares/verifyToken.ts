@@ -4,7 +4,7 @@ import { ApiError } from "../utils/apiError";
 import { User } from "../user/user.schema";
 import { NextFunction, Request, Response } from "express";
 
-configDotenv();
+// configDotenv();
 
 export const verifyToken = async (
   req: Request,

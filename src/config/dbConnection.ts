@@ -10,6 +10,7 @@ class Database {
 
   private async connect() {
     try {
+      logger.info(`Connecting to MongoDB: ${process.env.DB_URL}`);
       await connect(process.env.DB_URL!, {
         serverSelectionTimeoutMS: 50000,
       });
