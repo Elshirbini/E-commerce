@@ -1,11 +1,11 @@
 import app from "./app";
-import dotenv from "dotenv";
+import { configDotenv } from "dotenv";
 import { logger } from "./config/logger";
-import { db } from "./config/dbConnection";
-dotenv.config();
+import { dbConnection } from "./config/dbConnection";
+configDotenv();
 
 app.listen(8080, "0.0.0.0", () => {
-  db;
+  dbConnection();
   logger.info(`🚀 Server running on PORT:${process.env.PORT}`);
 });
 
