@@ -50,7 +50,7 @@ const renderProductDetails = (item: any) => {
 export class NewOrderTemplateForAdmin implements EmailTemplate {
   constructor(
     private readonly recipient: string,
-    private readonly order: OrderForEmail,
+    private readonly order: Partial<OrderDocument>,
     private readonly user?: { fullName: string; email: string },
   ) {}
 
@@ -80,7 +80,7 @@ export class NewOrderTemplateForAdmin implements EmailTemplate {
       "عميل غير محدد";
 
     const paymentText =
-      paymentMethod === "card" ? "بطاقة بنكية" : "الدفع عند الاستلام";
+      paymentMethod === "stripe" ? "بطاقة بنكية" : "الدفع عند الاستلام";
     const paidStatus = isPaid ? "✅ مدفوع" : "💵 غير مدفوع";
 
     const address = shippingAddress
@@ -152,7 +152,7 @@ export class NewOrderTemplateForAdmin implements EmailTemplate {
 export class NewOrderTemplateForUser implements EmailTemplate {
   constructor(
     private readonly recipient: string,
-    private readonly order: OrderForEmail,
+    private readonly order: Partial<OrderDocument>,
     private readonly user?: { fullName: string; email: string },
   ) {}
 
@@ -183,7 +183,7 @@ export class NewOrderTemplateForUser implements EmailTemplate {
       "عميل غير محدد";
 
     const paymentText =
-      paymentMethod === "card" ? "بطاقة بنكية" : "الدفع عند الاستلام";
+      paymentMethod === "stripe" ? "بطاقة بنكية" : "الدفع عند الاستلام";
     const paidStatus = isPaid ? "✅ مدفوع" : "💵 غير مدفوع";
 
     const address = shippingAddress

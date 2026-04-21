@@ -80,15 +80,17 @@ export const checkoutStripe = async (req: Request, res: Response) => {
 
   const order = await createOrder({ ...orderData, paymentMethod: "stripe" });
 
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-  const successUrl = `${frontendUrl}/payment-confirm?orderId=${order._id}`;
-  const cancelUrl = `${frontendUrl}/payment-confirm?orderId=${order._id}`;
+  const frontendUrl =
+    process.env.NODE_ENV === "prod"
+      ? process.env.FRONTEND_URL_PROD
+      : process.env.FRONTEND_URL;
+
   const stripe = getStripeClient();
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
-    success_url: successUrl,
-    cancel_url: cancelUrl,
+    success_url: `${frontendUrl}/payment-confirm?orderId=${order._id}`,
+    cancel_url: `${frontendUrl}/payment-confirm?orderId=${order._id}`,
     client_reference_id: order._id.toString(),
     metadata: { orderId: order._id.toString() },
     line_items: [

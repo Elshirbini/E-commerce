@@ -45,7 +45,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:8080",
-      "https://1e91-197-32-135-55.ngrok-free.app",
+      "https://italy-market-mu.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
