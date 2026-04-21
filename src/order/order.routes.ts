@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  confirmOrder,
+  confirmCashOrder,
   getAllOrders,
   getOrderDetails,
   updateOrder,
@@ -16,8 +16,8 @@ import { isAdmin } from "../middlewares/isAdmin";
 const router = express.Router();
 
 router
-  .route("/confirm/:id")
-  .patch(confirmOrderValidation, validateInputs, confirmOrder);
+  .route("/cash/confirm/:id")
+  .patch(confirmOrderValidation, validateInputs, confirmCashOrder);
 
 router.use(verifyToken, isAdmin);
 

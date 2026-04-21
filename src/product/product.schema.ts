@@ -23,6 +23,7 @@ const product = new Schema(
     },
     price: {
       kwd: { type: Number, required: false },
+      usd: { type: Number, required: false },
       sar: { type: Number, required: false },
       qar: { type: Number, required: false },
       bhd: { type: Number, required: false },
@@ -32,6 +33,7 @@ const product = new Schema(
     discount: { type: Number, min: 0, max: 100 },
     finalPrice: {
       kwd: { type: Number },
+      usd: { type: Number },
       sar: { type: Number },
       qar: { type: Number },
       bhd: { type: Number },

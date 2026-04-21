@@ -17,8 +17,6 @@ type ShippingAddressInput = {
   country: string;
   governorate?: string;
   area?: string;
-  piece: string;
-  gaddah?: string;
   street: string;
   buildingNumber: string;
   notes?: string;
@@ -107,7 +105,7 @@ export const buildOrderForCheckout = async (
       continue;
     }
 
-    const currentPrice = product.finalPrice?.kwd;
+    const currentPrice = product.finalPrice?.usd;
     if (typeof currentPrice !== "number") {
       invalidProducts.push(
         `${product.name?.en ?? "Product"} has invalid price`,

@@ -66,6 +66,11 @@ export const addProductValidator = [
     .isFloat({ gt: 0 })
     .withMessage("Price in AED must be a number greater than 0")
     .toFloat(),
+  body("price_usd")
+    .optional()
+    .isFloat({ gt: 0 })
+    .withMessage("Price in USD must be a number greater than 0")
+    .toFloat(),
 
   body("discount")
     .optional()

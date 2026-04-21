@@ -60,7 +60,7 @@ const cartSchema = new Schema<CartDocument>(
     },
     currency: {
       type: String,
-      default: "KWD",
+      default: "USD",
     },
   },
   { timestamps: true },

@@ -47,8 +47,8 @@ export const addToCart = async (req: Request, res: Response) => {
       cart.items.push({
         productId,
         quantity,
-        price: product.finalPrice?.kwd ?? 0,
-        totalPrice: quantity * (product.finalPrice?.kwd ?? 0),
+        price: product.finalPrice?.usd ?? 0,
+        totalPrice: quantity * (product.finalPrice?.usd ?? 0),
       });
     }
 
@@ -67,14 +67,14 @@ export const addToCart = async (req: Request, res: Response) => {
     cartItem = {
       productId,
       quantity,
-      price: product.finalPrice?.kwd!,
-      totalPrice: quantity * product.finalPrice?.kwd!,
+      price: product.finalPrice?.usd!,
+      totalPrice: quantity * product.finalPrice?.usd!,
     };
 
     cartData = {
       userId,
       items: [cartItem],
-      currency: "KWD",
+      currency: "USD",
     };
 
     await createCart(cartData);
@@ -120,8 +120,8 @@ export const syncCartAfterLogin = async (req: Request, res: Response) => {
       cart.items.push({
         productId,
         quantity: finalQuantity,
-        price: product.finalPrice?.kwd!,
-        totalPrice: finalQuantity * product.finalPrice?.kwd!,
+        price: product.finalPrice?.usd!,
+        totalPrice: finalQuantity * product.finalPrice?.usd!,
       });
     }
   }
@@ -178,7 +178,7 @@ export const updateCart = async (req: Request, res: Response) => {
     await pullItemFromCart(cart._id.toString(), userId!, productId);
   } else {
     item.quantity = quantity;
-    item.price = product.finalPrice?.kwd!;
+    item.price = product.finalPrice?.usd!;
     item.totalPrice = item.quantity * item.price;
   }
 

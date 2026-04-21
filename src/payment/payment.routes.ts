@@ -5,6 +5,7 @@ import { isAdmin } from "../middlewares/isAdmin";
 import {
   checkoutCash,
   checkoutStripe,
+  getPaymentStatus,
   markCashPaid,
   stripeWebhook,
 } from "./payment.controller";
@@ -30,6 +31,8 @@ router.post(
   validateInputs,
   checkoutStripe,
 );
+
+router.get("/status/:orderId", getPaymentStatus);
 
 router.use(verifyToken, isAdmin);
 router.patch("/:id/cash", markCashPaidValidation, validateInputs, markCashPaid);

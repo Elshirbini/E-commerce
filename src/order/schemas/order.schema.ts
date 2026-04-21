@@ -35,11 +35,14 @@ const order = new Schema(
       country: { type: String, required: true },
       governorate: String,
       area: String,
-      piece: { type: String, required: true },
-      gaddah: { type: String, required: false },
       street: { type: String, required: true },
       buildingNumber: { type: String, required: true },
       notes: String,
+    },
+    paymentMethod: {
+      type: String,
+      enum: ["cash", "stripe"],
+      required: true,
     },
     totalPrice: {
       type: Number,
@@ -50,6 +53,11 @@ const order = new Schema(
       default: false,
     },
     deliveredAt: Date,
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
+    paidAt: Date,
     isConfirmed: {
       type: Boolean,
       default: false,

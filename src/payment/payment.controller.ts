@@ -2,9 +2,15 @@ import { Request, Response } from "express";
 import { ApiError } from "../utils/apiError";
 import { success } from "../utils/response";
 import { buildOrderForCheckout } from "../order/order.checkout.service";
-import { createOrder } from "../order/order.repository";
+import {
+  createOrder,
+  findOrderByIdAndUpdate,
+  findOrderById,
+} from "../order/order.repository";
+import { processOrderConfirmation } from "../order/order.service";
 import {
   createPayment,
+  findLatestPaymentByOrderId,
   findPaymentById,
   findPaymentByStripeCheckoutSessionId,
   findPaymentByStripePaymentIntentId,
@@ -41,12 +47,11 @@ export const checkoutCash = async (req: Request, res: Response) => {
     userId,
   });
 
-  const order = await createOrder(orderData);
+  const order = await createOrder({ ...orderData, paymentMethod: "cash" });
   const payment = await createPayment({
     orderId: order._id,
     userId: order.userId,
     method: "cash",
-    provider: "cash",
     status: "pending",
     amount: invoice.totalPrice,
     currency: "usd",
@@ -73,11 +78,11 @@ export const checkoutStripe = async (req: Request, res: Response) => {
     throw new ApiError("Stripe is not configured", 500);
   }
 
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-  const successUrl = `${frontendUrl}/payment/success?orderId={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${frontendUrl}/payment/cancel?orderId={CHECKOUT_SESSION_ID}`;
+  const order = await createOrder({ ...orderData, paymentMethod: "stripe" });
 
-  const order = await createOrder(orderData);
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const successUrl = `${frontendUrl}/payment-confirm?orderId=${order._id}`;
+  const cancelUrl = `${frontendUrl}/payment-confirm?orderId=${order._id}`;
   const stripe = getStripeClient();
 
   const session = await stripe.checkout.sessions.create({
@@ -104,7 +109,6 @@ export const checkoutStripe = async (req: Request, res: Response) => {
     orderId: order._id,
     userId: order.userId,
     method: "stripe",
-    provider: "stripe",
     status: "pending",
     amount: invoice.totalPrice,
     currency,
@@ -123,14 +127,29 @@ export const checkoutStripe = async (req: Request, res: Response) => {
   });
 };
 
+export const getPaymentStatus = async (req: Request, res: Response) => {
+  const { orderId } = req.params;
+  const payment = await findLatestPaymentByOrderId(orderId);
+  if (!payment) throw new ApiError(req.__("Payment not found"), 404);
+
+  return success(res, 200, "Payment status retrieved successfully", {
+    paymentId: payment._id,
+    status: payment.status,
+    method: payment.method,
+    paidAt: payment.paidAt,
+    failureReason: payment.failureReason,
+  });
+};
+
 export const markCashPaid = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { paid } = req.body as { paid: boolean };
 
   const payment = await findPaymentById(id);
   if (!payment) throw new ApiError(req.__("Payment not found"), 404);
-  if (payment.method !== "cash")
+  if (payment.method !== "cash") {
     throw new ApiError("Only cash payments supported", 400);
+  }
 
   const updated = await updatePaymentStatus(
     payment._id.toString(),
@@ -174,45 +193,6 @@ export const stripeWebhook = async (req: Request, res: Response) => {
     );
   }
 
-  const handlePaymentIntent = async (
-    paymentIntent: StripePaymentIntent,
-    status: "paid" | "failed" | "requires_action" | "pending" | "cancelled",
-  ) => {
-    const payment = await findPaymentByStripePaymentIntentId(paymentIntent.id);
-    if (!payment) {
-      logger.warn(
-        `Received webhook for unknown payment intent ${paymentIntent.id}`,
-      );
-      return;
-    }
-
-    const patch: any = {};
-    if (status === "paid") patch.paidAt = new Date();
-    if (status === "failed")
-      patch.failureReason = paymentIntent.last_payment_error?.message;
-
-    await updatePaymentStatus(payment._id.toString(), status, patch);
-  };
-
-  const handleCheckoutSessionCompleted = async (
-    session: StripeCheckoutSession,
-  ) => {
-    const payment = await findPaymentByStripeCheckoutSessionId(session.id);
-    if (!payment) {
-      logger.warn(
-        `Received checkout.session.completed for unknown session ${session.id}`,
-      );
-      return;
-    }
-
-    const patch: any = { paidAt: new Date() };
-    if (session.payment_intent) {
-      patch.stripePaymentIntentId = session.payment_intent;
-    }
-
-    await updatePaymentStatus(payment._id.toString(), "paid", patch);
-  };
-
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as StripeCheckoutSession;
@@ -244,4 +224,70 @@ export const stripeWebhook = async (req: Request, res: Response) => {
   }
 
   return res.status(200).json({ received: true });
+};
+
+const handlePaymentIntent = async (
+  paymentIntent: StripePaymentIntent,
+  status: "paid" | "failed" | "requires_action" | "pending" | "cancelled",
+) => {
+  const payment = await findPaymentByStripePaymentIntentId(paymentIntent.id);
+  if (!payment) {
+    logger.warn(
+      `Received webhook for unknown payment intent ${paymentIntent.id}`,
+    );
+    return;
+  }
+
+  const patch: any = {};
+  if (status === "paid") patch.paidAt = new Date();
+  if (status === "failed") {
+    patch.failureReason = paymentIntent.last_payment_error?.message;
+  }
+
+  await updatePaymentStatus(payment._id.toString(), status, patch);
+};
+
+const handleCheckoutSessionCompleted = async (
+  session: StripeCheckoutSession,
+) => {
+  const payment = await findPaymentByStripeCheckoutSessionId(session.id);
+  if (!payment) {
+    logger.warn(
+      `Received checkout.session.completed for unknown session ${session.id}`,
+    );
+    return;
+  }
+
+  const orderCheck = await findOrderById(payment.orderId.toString());
+  if (!orderCheck) {
+    logger.warn(`Order not found for this payment ${payment._id}`);
+    return;
+  }
+
+  if (orderCheck.isConfirmed && orderCheck.isPaid) {
+    logger.info(
+      `Session ${session.id} already processed. Idempotency handled.`,
+    );
+    return;
+  }
+
+  const order = await findOrderByIdAndUpdate(payment.orderId.toString(), {
+    isConfirmed: true,
+    isPaid: true,
+    paidAt: new Date(),
+  });
+  if (!order) {
+    logger.warn(`Order not found for this payment ${payment._id}`);
+    return;
+  }
+
+  const patch: any = { paidAt: new Date() };
+  if (session.payment_intent) {
+    patch.stripePaymentIntentId = session.payment_intent;
+  }
+
+  await updatePaymentStatus(payment._id.toString(), "paid", patch);
+
+  // Trigger side effects same as cash confirm
+  await processOrderConfirmation(order, "paid", "stripe");
 };

@@ -40,12 +40,6 @@ export const checkoutCashValidation = [
     .withMessage("Country is required")
     .isString()
     .withMessage("Country must be a string"),
-  body("shippingAddress.piece")
-    .trim()
-    .notEmpty()
-    .withMessage("Piece is required")
-    .isString()
-    .withMessage("Piece must be a string"),
   body("shippingAddress.street")
     .trim()
     .notEmpty()
@@ -66,10 +60,6 @@ export const checkoutCashValidation = [
     .optional()
     .isString()
     .withMessage("Area must be a string"),
-  body("shippingAddress.gaddah")
-    .optional()
-    .isString()
-    .withMessage("Gaddah must be a string"),
   body("shippingAddress.notes")
     .optional()
     .isString()
@@ -117,12 +107,6 @@ export const checkoutStripeValidation = [
     .withMessage("Country is required")
     .isString()
     .withMessage("Country must be a string"),
-  body("shippingAddress.piece")
-    .trim()
-    .notEmpty()
-    .withMessage("Piece is required")
-    .isString()
-    .withMessage("Piece must be a string"),
   body("shippingAddress.street")
     .trim()
     .notEmpty()
@@ -143,10 +127,6 @@ export const checkoutStripeValidation = [
     .optional()
     .isString()
     .withMessage("Area must be a string"),
-  body("shippingAddress.gaddah")
-    .optional()
-    .isString()
-    .withMessage("Gaddah must be a string"),
   body("shippingAddress.notes")
     .optional()
     .isString()

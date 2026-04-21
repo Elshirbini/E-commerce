@@ -23,8 +23,6 @@ import { shippingTaxRoutes } from "./shippingTax/shippingTax.routes";
 import { pageRoutes } from "./page/page.routes";
 import { paymentRoutes } from "./payment/payment.routes";
 import "./cron/deleteUnconfirmedOrders";
-import { log } from "console";
-import { logger } from "./config/logger";
 
 configDotenv();
 
@@ -44,7 +42,11 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:8080"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:8080",
+      "https://1e91-197-32-135-55.ngrok-free.app",
+    ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   }),

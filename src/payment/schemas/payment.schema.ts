@@ -55,11 +55,6 @@ const paymentSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-    provider: {
-      type: String,
-      enum: ["cash", "stripe"],
-      required: true,
-    },
     stripePaymentIntentId: {
       type: String,
       required: false,

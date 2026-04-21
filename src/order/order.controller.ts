@@ -1,15 +1,13 @@
 import { Request, Response } from "express";
 import { ApiError } from "../utils/apiError";
-import { findCartByUserId, saveCart } from "../cart/cart.repository";
 import { success } from "../utils/response";
 import {
   findOrderById,
   findOrderByIdAndUpdate,
   getOrders,
 } from "./order.repository";
-import { findProductById, saveProduct } from "../product/product.repository";
-import { EmailService } from "../email/email.service";
 import { findLatestPaymentByOrderId } from "../payment/payment.repository";
+import { processOrderConfirmation } from "./order.service";
 
 export const updateOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -20,6 +18,11 @@ export const updateOrder = async (req: Request, res: Response) => {
   } else {
     orderData.deliveredAt = null;
   }
+  if (orderData.isPaid) {
+    orderData.paidAt = new Date(Date.now()).toLocaleString("en-KW");
+  } else {
+    orderData.paidAt = null;
+  }
 
   const order = await findOrderByIdAndUpdate(id, orderData);
   if (!order) throw new ApiError(req.__("Order not found"), 404);
@@ -27,67 +30,22 @@ export const updateOrder = async (req: Request, res: Response) => {
   return success(res, 200, "Order updated successfully");
 };
 
-export const confirmOrder = async (req: Request, res: Response) => {
+export const confirmCashOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
   let orderData = req.body;
 
   const order = await findOrderByIdAndUpdate(id, orderData);
   if (!order) throw new ApiError(req.__("Order not found"), 404);
 
+  const payment = await findLatestPaymentByOrderId(order._id.toString());
+  if (!payment) throw new ApiError(req.__("Payment not found"), 404);
+
+  if (payment.method === "stripe" && order.paymentMethod === "stripe") {
+    throw new ApiError("Cannot confirm card order", 403);
+  }
+
   if (orderData.isConfirmed) {
-    const productsById = new Map<string, any>();
-
-    for (const item of order.cartItems) {
-      const product = await findProductById(item.productId.toString());
-      if (!product) {
-        throw new ApiError(`Product with id ${item.productId} not found`, 404);
-      }
-
-      product.quantity -= item.quantity;
-
-      await saveProduct(product);
-      productsById.set(item.productId.toString(), product.toObject());
-    }
-
-    if (order.userId) {
-      const cart = await findCartByUserId(order.userId._id.toString());
-      if (cart) {
-        cart.items = [];
-        cart.subtotal = 0;
-        await saveCart(cart);
-      }
-    }
-
-    const userInfo = {
-      fullName: order.userId ? (order.userId as any).fullName : "",
-      email: order.userId ? (order.userId as any).email : "",
-    };
-
-    const orderObj = order.toObject();
-    const payment = await findLatestPaymentByOrderId(order._id.toString());
-    const orderForEmail = {
-      ...orderObj,
-      paymentMethod: payment?.method === "stripe" ? "card" : "cash",
-      isPaid: payment?.status === "paid",
-      cartItems: (orderObj.cartItems ?? []).map((item: any) => {
-        const product = productsById.get(item.productId.toString());
-        return {
-          ...item,
-          product,
-        };
-      }),
-    };
-
-    await new EmailService().sendNewOrderEmailForAdmin(
-      process.env.ADMIN_EMAIL || "admin@store.com",
-      orderForEmail as any,
-      order.userId ? userInfo : undefined,
-    );
-    // await new EmailService().sendNewOrderEmailForUser(
-    //   order.email ? order.email : (order.userId as any).email,
-    //   order,
-    //   order.userId ? userInfo : undefined
-    // );
+    await processOrderConfirmation(order, payment?.status || "pending", "cash");
   }
 
   return success(res, 200, "Order updated successfully");

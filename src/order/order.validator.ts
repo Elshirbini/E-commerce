@@ -52,18 +52,6 @@ export const createCashOrderValidation = [
     .isString()
     .withMessage("Area must be a string"),
 
-  body("shippingAddress.piece")
-    .trim()
-    .notEmpty()
-    .withMessage("Piece is required")
-    .isString()
-    .withMessage("Piece must be a string"),
-
-  body("shippingAddress.gaddah")
-    .optional()
-    .isString()
-    .withMessage("Gaddah must be a string"),
-
   body("shippingAddress.street")
     .trim()
     .notEmpty()
@@ -111,10 +99,8 @@ export const updateOrderValidation = [
     .optional()
     .isBoolean()
     .withMessage("isDelivered must be a boolean"),
-  body("isConfirmed")
-    .optional()
-    .isBoolean()
-    .withMessage("isConfirmed must be a boolean"),
+  body("isPaid").optional().isBoolean().withMessage("isPaid must be a boolean"),
+  checkExact(),
 ];
 export const confirmOrderValidation = [
   body("isConfirmed")

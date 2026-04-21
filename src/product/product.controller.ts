@@ -27,6 +27,7 @@ export const addProduct = async (req: Request, res: Response) => {
     description_ar,
     description_en,
     price_kwd,
+    price_usd,
     price_sar,
     price_qar,
     price_bhd,
@@ -48,6 +49,7 @@ export const addProduct = async (req: Request, res: Response) => {
     },
     price: {
       kwd: price_kwd,
+      usd: price_usd,
       sar: price_sar,
       qar: price_qar,
       bhd: price_bhd,
@@ -132,6 +134,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     description_ar,
     description_en,
     price_kwd,
+    price_usd,
     price_sar,
     price_qar,
     price_bhd,
@@ -150,6 +153,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     },
     price: {
       kwd: price_kwd,
+      usd: price_usd,
       sar: price_sar,
       qar: price_qar,
       bhd: price_bhd,
